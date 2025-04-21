@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Yahoo Dictionary to Anki",
+  "version": "1.0",
+  "description": "Create an Anki flashcard from Yahoo dictionary search results.",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["http://localhost:8765/"],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": "images/icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://tw.dictionary.search.yahoo.com/*"],
+      "js": ["content_scripts/content.js"]
+    }
+  ]
+}
