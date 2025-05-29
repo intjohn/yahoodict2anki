@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .word-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .field {
+      margin-bottom: 15px;
+    }
+    .field-label {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .field-content {
+      color: #666;
+      line-height: 1.5;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="word-card">
+      <div class="field">
+        <div class="field-label">Word or Phrase</div>
+        <div class="field-content" id="word">...</div>
+      </div>
+      <div class="field">
+        <div class="field-label">Pronounce</div>
+        <div class="field-content" id="pronounce">...</div>
+      </div>
+      <div class="field">
+        <div class="field-label">Definition</div>
+        <div class="field-content" id="definition">...</div>
+      </div>
+      <button id="add" disabled>Add to Anki</button>
+    </div>
+  </div>
+  <script src="sidepanel.js"></script>
+</body>
+</html> 
