@@ -17,7 +17,7 @@ export interface ContentScriptMessage {
 export const SidePanelMessage = {
   CloseSidePanel: 'closeSidePanel',
   ContentReloaded: 'contentReloaded',
-  SidePanelAlive: 'sidePanelAlive'
+  SidePanelAlive: 'sidePanelAlive',
 } as const;
 
-export type SidePanelMessageType = typeof SidePanelMessage[keyof typeof SidePanelMessage];
+export type SidePanelMessageType = (typeof SidePanelMessage)[keyof typeof SidePanelMessage];
