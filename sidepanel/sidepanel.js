@@ -1,14 +1,12 @@
 // Update the side panel content with the word data
 const updateContent = (data) => {
-  console.debug('Received word data:', data);
-
   const { word, pronounce, definition } = data;
 
   document.getElementById('word').textContent = word;
   document.getElementById('pronounce').textContent = pronounce;
   document.getElementById('definition').textContent = definition;
   document.getElementById('add').disabled = !word || !definition;
-}
+};
 
 // Request initial data when side panel opens
 const fetchWordData = () => {
@@ -39,28 +37,28 @@ document.getElementById('add').addEventListener('click', () => {
           fields: {
             WordPhrase: word,
             Pronounce: pronounce,
-            Definition: definition
+            Definition: definition,
           },
           options: {
-            allowDuplicate: false
+            allowDuplicate: false,
           },
-          tags: ['yahoo2anki']
-        }
-      }
-    })
+          tags: ['yahoo2anki'],
+        },
+      },
+    }),
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.error) {
-      alert('Failed to add note: ' + data.error);
-    } else {
-      alert('Success!');
-    }
-  });
-}); 
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.error) {
+        alert('Failed to add note: ' + data.error);
+      } else {
+        alert('Success!');
+      }
+    });
+});
 
 // Handle side panel to programmatically close
-chrome.runtime.onMessage.addListener(message => {
+chrome.runtime.onMessage.addListener((message) => {
   if (message === 'closeSidePanel') {
     window.close();
   }

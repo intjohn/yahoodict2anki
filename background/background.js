@@ -6,10 +6,13 @@ let curActiveTabId = null;
 
 // Inject content script into the given tab
 const injectContentScript = (tabId, callback) => {
-  chrome.scripting.executeScript({
-    target: { tabId },
-    files: ['content_scripts/content.js']
-  }, callback);
+  chrome.scripting.executeScript(
+    {
+      target: { tabId },
+      files: ['content_scripts/content.js'],
+    },
+    callback
+  );
 };
 
 // Open the side panel on the given tab
@@ -33,8 +36,6 @@ const updateSidePanel = () => {
 
 // Handle click on extension icon
 chrome.action.onClicked.addListener((tab) => {
-  console.debug(`action clicked on tab ${tab.id}`);
-
   if (isSidePanelOpen) {
     closeSidePanel();
   } else {
