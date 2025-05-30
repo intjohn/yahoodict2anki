@@ -9,8 +9,26 @@ export default [
     ignores: ['dist/**/*'],
   },
   eslint.configs.recommended,
+  // JavaScript specific configuration
   {
-    files: ['**/*.js', '**/*.ts'],
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        ...globals.es2021,
+        chrome: 'readonly',
+      },
+    },
+    rules: {
+      'no-unused-vars': 'warn',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
+  },
+  // TypeScript specific configuration
+  {
+    files: ['**/*.ts'],
     plugins: {
       '@typescript-eslint': tseslint,
     },
@@ -25,11 +43,12 @@ export default [
       },
     },
     rules: {
-      'no-unused-vars': 'warn',
+      // Disable the base rule as it can report incorrect errors
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': 'warn',
     },
   },
   prettier,

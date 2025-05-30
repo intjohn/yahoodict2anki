@@ -3,13 +3,17 @@
   "version": "1.0.0",
   "description": "Chrome extension to create Anki flashcards from Yahoo dictionary search results",
   "type": "module",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "tsc --watch",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix",
     "prettier": "prettier --write \"**/*.{js,ts,json,html,css}\"",
-    "prettier:check": "prettier --check \"**/*.{js,ts,json,html,css}\""
+    "prettier:check": "prettier --check \"**/*.{js,ts,json,html,css}\"",
+    "clean": "rm -rf dist",
+    "prebuild": "pnpm clean",
+    "postbuild": "copyfiles manifest.json \"images/**/*\" dist/ && copyfiles -f src/sidepanel/sidepanel.html dist/sidepanel/"
   },
   "keywords": [
     "chrome-extension",
@@ -21,12 +25,15 @@
   "license": "ISC",
   "packageManager": "pnpm@10.11.0",
   "devDependencies": {
-    "@eslint/js": "^9.27.0",
+    "@eslint/js": "9.27.0",
+    "@types/chrome": "0.0.324",
     "@typescript-eslint/eslint-plugin": "8.33.0",
     "@typescript-eslint/parser": "8.33.0",
+    "copyfiles": "2.4.1",
     "eslint": "9.27.0",
     "eslint-config-prettier": "10.1.5",
-    "globals": "^16.2.0",
-    "prettier": "3.5.3"
+    "globals": "16.2.0",
+    "prettier": "3.5.3",
+    "typescript": "5.8.3"
   }
 }
