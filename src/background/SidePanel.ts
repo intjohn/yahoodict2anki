@@ -70,11 +70,17 @@ export class SidePanel {
    * Injects the content script into the tab
    * @param callback - The callback to call when the content script is injected
    */
-  private static injectContentScript(tabId: number, callback: (results: chrome.scripting.InjectionResult<unknown>[]) => void): void {
-    chrome.scripting.executeScript({
-      target: { tabId },
-      files: ['content_scripts/content.js'],
-    }, callback);
+  private static injectContentScript(
+    tabId: number,
+    callback: (results: chrome.scripting.InjectionResult<unknown>[]) => void
+  ): void {
+    chrome.scripting.executeScript(
+      {
+        target: { tabId },
+        files: ['content_scripts/content.js'],
+      },
+      callback
+    );
   }
 
   /**
@@ -100,4 +106,4 @@ export class SidePanel {
       });
     }
   }
-} 
+}

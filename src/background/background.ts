@@ -8,7 +8,7 @@ chrome.action.onClicked.addListener(async (tab: chrome.tabs.Tab) => {
 });
 
 // Handle tab switch
-chrome.tabs.onActivated.addListener(async (activeInfo: chrome.tabs.TabActiveInfo) => {
+chrome.tabs.onActivated.addListener(() => {
   SidePanel.close();
 });
 

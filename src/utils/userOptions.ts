@@ -15,4 +15,4 @@ export const loadOptions = async (): Promise<ExtensionOptions> => {
  */
 export const saveOptions = async (options: ExtensionOptions): Promise<void> => {
   await chrome.storage.sync.set(options);
-}; 
+};

@@ -41,4 +41,4 @@ const initializeOptions = async (): Promise<void> => {
 };
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', initializeOptions); 
+document.addEventListener('DOMContentLoaded', initializeOptions);

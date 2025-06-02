@@ -1,11 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <style>
       body {
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
         padding: 20px;
         margin: 0;
         color: #333;
@@ -100,16 +103,8 @@
         <div class="option-section">
           <h2>AnkiConnect Settings</h2>
           <div class="option-item">
-            <label class="option-label" for="ankiConnectPort">
-              AnkiConnect Port
-            </label>
-            <input
-              type="number"
-              id="ankiConnectPort"
-              class="option-input"
-              min="1"
-              max="65535"
-            />
+            <label class="option-label" for="ankiConnectPort"> AnkiConnect Port </label>
+            <input type="number" id="ankiConnectPort" class="option-input" min="1" max="65535" />
             <div class="option-description">
               The port number that AnkiConnect is listening on. Default is 8765.
             </div>
@@ -123,4 +118,4 @@
     </div>
     <script type="module" src="options.js"></script>
   </body>
-</html> 
+</html>
