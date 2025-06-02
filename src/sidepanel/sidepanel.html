@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -52,24 +52,45 @@
       button:hover:not(:disabled) {
         background: #45a049;
       }
+      .unsupported-message {
+        display: none;
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+      }
+      .unsupported-message.visible {
+        display: block;
+      }
+      .word-content {
+        display: none;
+      }
+      .word-content.visible {
+        display: block;
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <div class="word-card">
-        <div class="field">
-          <div class="field-label">Word or Phrase</div>
-          <div class="field-content" id="word">...</div>
+      <div class="word-content">
+        <div class="word-card">
+          <div class="field">
+            <div class="field-label">Word or Phrase</div>
+            <div class="field-content" id="word">...</div>
+          </div>
+          <div class="field">
+            <div class="field-label">Pronounce</div>
+            <div class="field-content" id="pronounce">...</div>
+          </div>
+          <div class="field">
+            <div class="field-label">Definition</div>
+            <div class="field-content" id="definition">...</div>
+          </div>
+          <button id="add" disabled>Add to Anki</button>
         </div>
-        <div class="field">
-          <div class="field-label">Pronounce</div>
-          <div class="field-content" id="pronounce">...</div>
-        </div>
-        <div class="field">
-          <div class="field-label">Definition</div>
-          <div class="field-content" id="definition">...</div>
-        </div>
-        <button id="add" disabled>Add to Anki</button>
+      </div>
+      <div class="unsupported-message">
+        <h2>Unsupported Page</h2>
+        <p>Please navigate to a Yahoo Dictionary search result page to use this extension.</p>
       </div>
     </div>
     <script type="module" src="sidepanel.js"></script>

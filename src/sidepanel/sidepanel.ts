@@ -3,19 +3,27 @@ import { SidePanelMessage } from '../types';
 
 // Update the side panel content with the word data
 const updateContent = (data: WordData | undefined): void => {
-  if (!data) return;
+  const wordContent = document.querySelector('.word-content');
+  const unsupportedMessage = document.querySelector('.unsupported-message');
 
-  const { word, pronounce, definition } = data;
+  if (!data || (!data.word && !data.definition)) {
+    wordContent?.classList.remove('visible');
+    unsupportedMessage?.classList.add('visible');
+    return;
+  }
+
+  wordContent?.classList.add('visible');
+  unsupportedMessage?.classList.remove('visible');
 
   const wordElement = document.getElementById('word');
   const pronounceElement = document.getElementById('pronounce');
   const definitionElement = document.getElementById('definition');
   const addButton = document.getElementById('add') as HTMLButtonElement | null;
 
-  if (wordElement) wordElement.textContent = word ?? '';
-  if (pronounceElement) pronounceElement.textContent = pronounce ?? '';
-  if (definitionElement) definitionElement.textContent = definition ?? '';
-  if (addButton) addButton.disabled = !word || !definition;
+  if (wordElement) wordElement.textContent = data.word ?? '';
+  if (pronounceElement) pronounceElement.textContent = data.pronounce ?? '';
+  if (definitionElement) definitionElement.textContent = data.definition ?? '';
+  if (addButton) addButton.disabled = !data.word || !data.definition;
 };
 
 // Request initial data when side panel opens
