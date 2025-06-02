@@ -8,10 +8,12 @@ async function build() {
   await mkdir('dist/sidepanel', { recursive: true });
   await mkdir('dist/content_scripts', { recursive: true });
   await mkdir('dist/images', { recursive: true });
+  await mkdir('dist/options', { recursive: true });
 
   // Copy static files
   await copyFile('manifest.json', 'dist/manifest.json');
   await copyFile('src/sidepanel/sidepanel.html', 'dist/sidepanel/sidepanel.html');
+  await copyFile('src/options/options.html', 'dist/options/options.html');
   await copyFile('images/icon.png', 'dist/images/icon.png');
 
   // Common build options
@@ -44,6 +46,12 @@ async function build() {
       ...buildOptions,
       entryPoints: ['src/content_scripts/content.ts'],
       outfile: 'dist/content_scripts/content.js',
+    }),
+    // Options page script
+    esbuild.context({
+      ...buildOptions,
+      entryPoints: ['src/options/options.ts'],
+      outfile: 'dist/options/options.js',
     }),
   ]);
 

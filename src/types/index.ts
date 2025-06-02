@@ -17,7 +17,21 @@ export interface ContentScriptMessage {
 export const SidePanelMessage = {
   CloseSidePanel: 'closeSidePanel',
   ContentReloaded: 'contentReloaded',
-  SidePanelAlive: 'sidePanelAlive',
+  SidePanelAlive: 'sidePanelAlive'
 } as const;
 
-export type SidePanelMessageType = (typeof SidePanelMessage)[keyof typeof SidePanelMessage];
+export type SidePanelMessageType = typeof SidePanelMessage[keyof typeof SidePanelMessage];
+
+export const BackgroundMessage = {
+  OptionsChanged: 'optionsChanged',
+} as const;
+
+export type BackgroundMessageType = typeof BackgroundMessage[keyof typeof BackgroundMessage];
+
+export interface ExtensionOptions {
+  ankiConnectPort: number;
+}
+
+export const defaultOptions: ExtensionOptions = {
+  ankiConnectPort: 8765,
+};
