@@ -1,13 +1,17 @@
 <script lang="ts">
   import type { WordData } from '../types';
+  import { SidePanelMessage } from '../types';
   import WordCard from './WordCard.svelte';
   import UnsupportedMessage from './UnsupportedMessage.svelte';
+  import LoadingSpinner from './LoadingSpinner.svelte';
 
   let wordData: WordData | undefined;
   let isSupported = false;
+  let isLoading = true;
 
   // Request initial data when side panel opens
   function fetchWordData(): void {
+    isLoading = true;
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.id) {
         chrome.tabs.sendMessage(
@@ -17,28 +21,32 @@
           (data: WordData | undefined) => {
             wordData = data;
             isSupported = !!(data && (data.word || data.definition));
+            isLoading = false;
           }
         );
+      } else {
+        isLoading = false;
       }
     });
   }
 
-  // Handle when tab content is reloaded
-  chrome.runtime.onMessage.addListener((message: string) => {
-    if (message === 'contentReloaded') {
-      fetchWordData();
-    }
-  });
-
-  // Handle side panel to programmatically close
-  chrome.runtime.onMessage.addListener((message: string) => {
-    if (message === 'closeSidePanel') {
-      window.close();
+  // Handle messages from background script
+  chrome.runtime.onMessage.addListener((message: SidePanelMessage) => {
+    switch (message) {
+      case SidePanelMessage.ContentLoading:
+        isLoading = true;
+        break;
+      case SidePanelMessage.ContentReloaded:
+        fetchWordData();
+        break;
+      case SidePanelMessage.CloseSidePanel:
+        window.close();
+        break;
     }
   });
 
   // Create liveness connection
-  chrome.runtime.connect({ name: 'sidePanelAlive' });
+  chrome.runtime.connect({ name: SidePanelMessage.SidePanelAlive });
 
   // Initial fetch
   fetchWordData();
@@ -53,7 +61,9 @@
 </style>
 
 <div class="container">
-  {#if isSupported}
+  {#if isLoading}
+    <LoadingSpinner />
+  {:else if isSupported}
     <WordCard {wordData} />
   {:else}
     <UnsupportedMessage />

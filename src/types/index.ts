@@ -6,7 +6,7 @@ export interface WordData {
 
 export interface AnkiResponse {
   error?: string;
-  result?: number;
+  result?: number | string[] | string[];
 }
 
 export interface ContentScriptMessage {
@@ -14,13 +14,16 @@ export interface ContentScriptMessage {
   data?: WordData;
 }
 
-export const SidePanelMessage = {
-  CloseSidePanel: 'closeSidePanel',
-  ContentReloaded: 'contentReloaded',
-  SidePanelAlive: 'sidePanelAlive',
-} as const;
+export enum SidePanelMessage {
+  CloseSidePanel = 'closeSidePanel',
+  ContentReloaded = 'contentReloaded',
+  ContentLoading = 'contentLoading',
+  SidePanelAlive = 'sidePanelAlive',
+}
 
-export type SidePanelMessageType = (typeof SidePanelMessage)[keyof typeof SidePanelMessage];
+export type SidePanelStatus = 'open' | 'closed';
+
+export type SidePanelMessageType = SidePanelMessage;
 
 export const BackgroundMessage = {
   OptionsChanged: 'optionsChanged',

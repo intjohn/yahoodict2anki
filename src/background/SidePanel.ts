@@ -5,17 +5,18 @@ type SidePanelStatus = 'open' | 'closed' | 'pending';
 export class SidePanel {
   private static status: SidePanelStatus = 'closed';
   private static sidePanelListening: boolean = false;
+  private static currentHost: string | null;
 
   /**
    * Toggles the side panel
    * @param tabId - The tab ID to toggle the side panel for
    */
-  public static toggle(tabId: number): void {
+  public static toggle(tab: chrome.tabs.Tab): void {
     if (SidePanel.status === 'open') {
       return SidePanel.close();
     }
     if (SidePanel.status === 'closed') {
-      return SidePanel.open(tabId);
+      return SidePanel.open(tab);
     }
   }
 
@@ -24,7 +25,7 @@ export class SidePanel {
    * @param tabId - The tab ID to update the side panel for
    */
   public static update(tabId: number): void {
-    if (SidePanel.status === 'closed') {
+    if (SidePanel.status !== 'open') {
       return;
     }
     chrome.tabs.get(tabId, (tab) => {
@@ -36,11 +37,21 @@ export class SidePanel {
     });
   }
 
+  public static loading(tabUrl: string | undefined): void {
+    if (SidePanel.status === 'open') {
+      if (typeof tabUrl === 'undefined' || new URL(tabUrl).hostname === SidePanel.currentHost) {
+        chrome.runtime.sendMessage(SidePanelMessage.ContentLoading);
+      } else {
+        SidePanel.close();
+      }
+    }
+  }
+
   /**
    * Signal the side panel to close
    */
   public static close(): void {
-    if (SidePanel.status === 'closed') {
+    if (SidePanel.status !== 'open') {
       return;
     }
     SidePanel.status = 'pending';
@@ -51,12 +62,16 @@ export class SidePanel {
    * Open the side panel with necessary content script injected
    * @param tabId - The tab ID to open the side panel for
    */
-  private static open(tabId: number): void {
-    SidePanel.status = 'pending';
-    SidePanel.setupLivenessConnection();
-    SidePanel.injectContentScript(tabId, () => {
-      chrome.sidePanel.open({ tabId });
-    });
+  private static open(tab: chrome.tabs.Tab): void {
+    if (tab.id) {
+      const tabId = tab.id;
+      SidePanel.status = 'pending';
+      SidePanel.currentHost = tab.url ? new URL(tab.url).hostname : '';
+      SidePanel.setupLivenessConnection();
+      SidePanel.injectContentScript(tabId, () => {
+        chrome.sidePanel.open({ tabId });
+      });
+    }
   }
 
   /**
@@ -103,6 +118,7 @@ export class SidePanel {
       SidePanel.status = 'open';
       port.onDisconnect.addListener(() => {
         SidePanel.status = 'closed';
+        SidePanel.currentHost = null;
       });
     }
   }
