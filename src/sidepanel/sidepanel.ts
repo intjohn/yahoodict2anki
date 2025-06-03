@@ -1,5 +1,7 @@
 import type { WordData, ContentScriptMessage, AnkiResponse, SidePanelMessageType } from '../types';
 import { SidePanelMessage } from '../types';
+import { mount } from 'svelte';
+import App from './App.svelte';
 
 // Update the side panel content with the word data
 const updateContent = (data: WordData | undefined): void => {
@@ -107,3 +109,7 @@ chrome.runtime.onMessage.addListener((message: SidePanelMessageType) => {
 
 // Create liveness connection, that can indicate if the side panel is still open
 chrome.runtime.connect({ name: SidePanelMessage.SidePanelAlive });
+
+mount(App, {
+  target: document.getElementById('app') as HTMLElement,
+});

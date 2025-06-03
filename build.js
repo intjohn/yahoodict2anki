@@ -1,5 +1,7 @@
 import * as esbuild from 'esbuild';
 import { copyFile, mkdir } from 'fs/promises';
+import sveltePlugin from 'esbuild-svelte';
+import { sveltePreprocess } from 'svelte-preprocess';
 
 async function build() {
   // Ensure dist directory exists
@@ -25,6 +27,15 @@ async function build() {
     sourcemap: true,
   };
 
+  // Svelte plugin configuration
+  const svelteOptions = {
+    compilerOptions: {
+      dev: process.env.NODE_ENV !== 'production',
+      css: 'injected',
+    },
+    preprocess: sveltePreprocess(),
+  };
+
   // Check if watch mode is enabled
   const isWatch = process.argv.includes('--watch');
 
@@ -40,6 +51,7 @@ async function build() {
       ...buildOptions,
       entryPoints: ['src/sidepanel/sidepanel.ts'],
       outfile: 'dist/sidepanel/sidepanel.js',
+      plugins: [sveltePlugin(svelteOptions)],
     }),
     // Content script
     esbuild.context({
@@ -52,6 +64,7 @@ async function build() {
       ...buildOptions,
       entryPoints: ['src/options/options.ts'],
       outfile: 'dist/options/options.js',
+      plugins: [sveltePlugin(svelteOptions)],
     }),
   ]);
 

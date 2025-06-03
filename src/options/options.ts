@@ -1,5 +1,7 @@
-import { ExtensionOptions } from '../types';
+import type { ExtensionOptions } from '../types';
 import { loadOptions, saveOptions } from '../utils/userOptions';
+import { mount } from 'svelte';
+import App from './App.svelte';
 
 // Update UI based on current options
 const updateUI = (options: ExtensionOptions): void => {
@@ -42,3 +44,7 @@ const initializeOptions = async (): Promise<void> => {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', initializeOptions);
+
+mount(App, {
+  target: document.getElementById('app') as HTMLElement,
+});

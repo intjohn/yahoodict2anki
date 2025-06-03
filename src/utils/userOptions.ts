@@ -1,4 +1,5 @@
-import { ExtensionOptions, defaultOptions } from '../types';
+import type { ExtensionOptions } from '../types';
+import { defaultOptions } from '../types';
 
 /**
  * Load saved options from Chrome's sync storage
