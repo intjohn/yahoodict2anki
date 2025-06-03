@@ -1,5 +1,22 @@
 import { SidePanel } from './SidePanel';
 
+// Create context menu item
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: 'lookup-yahoo-dict',
+    title: 'Lookup "%s" in Yahoo Dictionary',
+    contexts: ['selection'],
+  });
+});
+
+// Handle context menu click
+chrome.contextMenus.onClicked.addListener((info: chrome.contextMenus.OnClickData) => {
+  if (info.menuItemId === 'lookup-yahoo-dict' && info.selectionText) {
+    const yahooUrl = `https://tw.dictionary.yahoo.com/search?p=${encodeURIComponent(info.selectionText)}`;
+    chrome.tabs.create({ url: yahooUrl });
+  }
+});
+
 // Handle click on extension icon
 chrome.action.onClicked.addListener(async (tab: chrome.tabs.Tab) => {
   SidePanel.toggle(tab);

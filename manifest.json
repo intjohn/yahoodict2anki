@@ -9,8 +9,8 @@
     "48": "images/icon.png",
     "128": "images/icon.png"
   },
-  "permissions": ["scripting", "activeTab", "sidePanel", "tabs", "storage"],
-  "host_permissions": ["http://localhost/*"],
+  "permissions": ["scripting", "activeTab", "sidePanel", "tabs", "storage", "contextMenus"],
+  "host_permissions": ["http://localhost/*", "https://tw.dictionary.yahoo.com/*"],
   "action": {
     "default_icon": "images/icon.png"
   },
