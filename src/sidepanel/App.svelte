@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { WordData } from '../types';
   import { SidePanelMessage } from '../types';
-  import WordCard from './WordCard.svelte';
+  import AnkiNoteCreator from './AnkiNoteCreator.svelte';
   import UnsupportedMessage from './UnsupportedMessage.svelte';
   import LoadingSpinner from './LoadingSpinner.svelte';
 
@@ -64,7 +64,7 @@
   {#if isLoading}
     <LoadingSpinner />
   {:else if isSupported}
-    <WordCard {wordData} />
+    <AnkiNoteCreator {wordData} />
   {:else}
     <UnsupportedMessage />
   {/if}

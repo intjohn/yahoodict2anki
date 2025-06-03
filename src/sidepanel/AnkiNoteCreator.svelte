@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { WordData } from '../types';
   import { AnkiClient } from '../utils/AnkiClient';
+  import Button from '../components/Button.svelte';
+  import StatusMessage from '../components/StatusMessage.svelte';
+  import AnkiSettings from '../components/AnkiSettings.svelte';
+  import WordDataField from '../components/WordDataField.svelte';
 
   export let wordData: WordData | undefined;
 
@@ -27,7 +31,7 @@
       if (shouldClose) {
         window.close();
       }
-    }, 3000);
+    }, 2000);
   }
 
   // Save user preferences
@@ -62,10 +66,8 @@
     try {
       const ankiClient = new AnkiClient();
       
-      // Fetch decks
+      // Fetch decks and models
       decks = await ankiClient.getDeckNames();
-      
-      // Fetch models (note types)
       models = await ankiClient.getModelNames();
 
       // Load saved preferences
@@ -79,11 +81,11 @@
         selectedModel = models[0] || '';
       }
 
-      // Update model fields
       await updateModelFields();
     } catch (error) {
       console.error('Failed to fetch decks and models:', error);
-      alert('Failed to communicate with AnkiConnect. Is it running?');
+      statusMessage = 'Failed to communicate with AnkiConnect. Is it running?';
+      statusType = 'error';
     }
   }
 
@@ -116,29 +118,14 @@
         };
       }
 
-      // Save the new preferences
       await savePreferences();
     } catch (error) {
       console.error('Failed to fetch model fields:', error);
     }
   }
 
-  // Handle model selection change
-  async function onModelChange() {
-    await updateModelFields();
-  }
-
-  // Handle deck selection change
-  async function onDeckChange() {
-    await savePreferences();
-  }
-
-  // Handle field mapping change
-  async function onMappingChange() {
-    await savePreferences();
-  }
-
   async function addToAnki() {
+    console.log('addToAnki', wordData);
     if (!wordData) return;
     
     try {
@@ -211,43 +198,6 @@
     padding-bottom: 8px;
     border-bottom: 1px solid #eee;
   }
-  .field {
-    margin-bottom: 15px;
-  }
-  .field:last-child {
-    margin-bottom: 0;
-  }
-  .field-label {
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 5px;
-  }
-  .field-content {
-    color: #666;
-    line-height: 1.5;
-    margin-bottom: 8px;
-    background: #f8f9fa;
-    padding: 8px;
-    border-radius: 4px;
-  }
-  .field-mapping {
-    margin-top: 4px;
-    font-size: 14px;
-  }
-  .select-container {
-    margin-bottom: 15px;
-  }
-  .select-container:last-child {
-    margin-bottom: 0;
-  }
-  select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    margin-top: 5px;
-  }
   .button-container {
     margin-top: 20px;
     display: flex;
@@ -265,120 +215,68 @@
     margin: 0;
     cursor: pointer;
   }
+  input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+  }
   label {
     cursor: pointer;
   }
-  button {
-    background: #4caf50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.2s;
-  }
-  button:disabled {
-    background: #ccc;
+  label.disabled {
     cursor: not-allowed;
-  }
-  button:hover:not(:disabled) {
-    background: #45a049;
-  }
-  .status-message {
-    margin-top: 12px;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
-  }
-  .status-message.visible {
-    opacity: 1;
-  }
-  .status-message.success {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #a5d6a7;
-  }
-  .status-message.error {
-    background-color: #fbe9e7;
-    color: #c62828;
-    border: 1px solid #ffab91;
+    opacity: 0.7;
   }
 </style>
 
 <div class="word-card">
-  <div class="group">
-    <div class="group-title">Anki Settings</div>
-    <div class="select-container">
-      <div class="field-label">Deck</div>
-      <select bind:value={selectedDeck} on:change={onDeckChange}>
-        {#each decks as deck}
-          <option value={deck}>{deck}</option>
-        {/each}
-      </select>
-    </div>
-
-    <div class="select-container">
-      <div class="field-label">Note Type</div>
-      <select bind:value={selectedModel} on:change={onModelChange}>
-        {#each models as model}
-          <option value={model}>{model}</option>
-        {/each}
-      </select>
-    </div>
-  </div>
+  <AnkiSettings
+    {decks}
+    {models}
+    bind:selectedDeck
+    bind:selectedModel
+    disabled={isProcessing}
+    onDeckChange={savePreferences}
+    onModelChange={updateModelFields}
+  />
 
   <div class="group">
     <div class="group-title">Word Data</div>
-    <div class="field">
-      <div class="field-label">Word or Phrase</div>
-      <div class="field-content">{wordData?.word ?? ''}</div>
-      <div class="field-mapping">
-        <select bind:value={fieldMappings.word} on:change={onMappingChange}>
-          <option value="">-- Map to field --</option>
-          {#each modelFields as field}
-            <option value={field}>{field}</option>
-          {/each}
-        </select>
-      </div>
-    </div>
+    <WordDataField
+      label="Word or Phrase"
+      value={wordData?.word ?? ''}
+      {modelFields}
+      bind:selectedField={fieldMappings.word}
+      disabled={isProcessing}
+      on:change={savePreferences}
+    />
 
-    <div class="field">
-      <div class="field-label">Pronounce</div>
-      <div class="field-content">{wordData?.pronounce ?? ''}</div>
-      <div class="field-mapping">
-        <select bind:value={fieldMappings.pronounce} on:change={onMappingChange}>
-          <option value="">-- Map to field --</option>
-          {#each modelFields as field}
-            <option value={field}>{field}</option>
-          {/each}
-        </select>
-      </div>
-    </div>
+    <WordDataField
+      label="Pronounce"
+      value={wordData?.pronounce ?? ''}
+      {modelFields}
+      bind:selectedField={fieldMappings.pronounce}
+      disabled={isProcessing}
+      on:change={savePreferences}
+    />
 
-    <div class="field">
-      <div class="field-label">Definition</div>
-      <div class="field-content">{wordData?.definition ?? ''}</div>
-      <div class="field-mapping">
-        <select bind:value={fieldMappings.definition} on:change={onMappingChange}>
-          <option value="">-- Map to field --</option>
-          {#each modelFields as field}
-            <option value={field}>{field}</option>
-          {/each}
-        </select>
-      </div>
-    </div>
+    <WordDataField
+      label="Definition"
+      value={wordData?.definition ?? ''}
+      {modelFields}
+      bind:selectedField={fieldMappings.definition}
+      disabled={isProcessing}
+      on:change={savePreferences}
+    />
   </div>
 
   <div class="button-container">
-    <button 
-      on:click={addToAnki} 
+    <Button
+      on:click={addToAnki}
       disabled={!wordData?.word || !wordData?.definition || !selectedDeck || !selectedModel || !fieldMappings.word || !fieldMappings.definition || isProcessing}
+      loading={isProcessing}
     >
-      {isProcessing ? 'Adding...' : 'Add to Anki'}
-    </button>
+      <svelte:fragment slot="loading">Adding...</svelte:fragment>
+      Add to Anki
+    </Button>
     <div class="checkbox-container">
       <input 
         type="checkbox" 
@@ -387,12 +285,9 @@
         on:change={savePreferences}
         disabled={isProcessing}
       >
-      <label for="allowDuplicate">Allow duplicate</label>
+      <label for="allowDuplicate" class:disabled={isProcessing}>Allow duplicate</label>
     </div>
   </div>
-  {#if statusMessage}
-    <div class="status-message {statusType} visible">
-      {statusMessage}
-    </div>
-  {/if}
+
+  <StatusMessage message={statusMessage} type={statusType} />
 </div> 

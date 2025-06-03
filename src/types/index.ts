@@ -38,3 +38,22 @@ export interface ExtensionOptions {
 export const defaultOptions: ExtensionOptions = {
   ankiConnectPort: 8765,
 };
+
+export interface AnkiFields {
+  [key: string]: string;
+}
+
+export interface AnkiNote {
+  deckName: string;
+  modelName: string;
+  fields: AnkiFields;
+  options?: {
+    allowDuplicate?: boolean;
+    duplicateScope?: string;
+  };
+  tags?: string[];
+}
+
+export type AnkiRequestParams = {
+  [key: string]: string | AnkiNote;
+};

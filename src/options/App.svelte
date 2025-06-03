@@ -1,5 +1,10 @@
 <script lang="ts">
+  import Button from '../components/Button.svelte';
+  import StatusMessage from '../components/StatusMessage.svelte';
+  
   let port = '8765';
+  let statusMessage = '';
+  let statusType: 'success' | 'error' | '' = '';
 
   // Load saved port when component mounts
   chrome.storage.sync.get(['ankiConnectPort'], (result) => {
@@ -12,7 +17,12 @@
   function savePort() {
     const portNumber = parseInt(port, 10);
     if (isNaN(portNumber) || portNumber < 1 || portNumber > 65535) {
-      alert('Please enter a valid port number (1-65535)');
+      statusMessage = 'Please enter a valid port number (1-65535)';
+      statusType = 'error';
+      setTimeout(() => {
+        statusMessage = '';
+        statusType = '';
+      }, 3000);
       return;
     }
 
@@ -21,13 +31,12 @@
         ankiConnectPort: port,
       },
       () => {
-        const status = document.getElementById('status');
-        if (status) {
-          status.textContent = 'Options saved.';
-          setTimeout(() => {
-            status.textContent = '';
-          }, 2000);
-        }
+        statusMessage = 'Options saved.';
+        statusType = 'success';
+        setTimeout(() => {
+          statusMessage = '';
+          statusType = '';
+        }, 3000);
       }
     );
   }
@@ -62,23 +71,6 @@
     border-color: #4caf50;
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
   }
-  button {
-    background: #4caf50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.2s;
-  }
-  button:hover {
-    background: #45a049;
-  }
-  #status {
-    margin-top: 10px;
-    color: #4caf50;
-  }
 </style>
 
 <div class="container">
@@ -95,6 +87,6 @@
     />
   </div>
 
-  <button on:click={savePort}>Save</button>
-  <div id="status"></div>
+  <Button on:click={savePort}>Save</Button>
+  <StatusMessage message={statusMessage} type={statusType} />
 </div> 

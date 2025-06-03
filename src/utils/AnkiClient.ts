@@ -1,19 +1,4 @@
-import type { AnkiResponse, WordData } from '../types';
-
-export interface AnkiFields {
-  [key: string]: string;
-}
-
-export interface AnkiNote {
-  deckName: string;
-  modelName: string;
-  fields: AnkiFields;
-  options?: {
-    allowDuplicate?: boolean;
-    duplicateScope?: string;
-  };
-  tags?: string[];
-}
+import type { AnkiNote, AnkiResponse, WordData, AnkiFields, AnkiRequestParams } from '../types';
 
 export class AnkiClient {
   private baseUrl: string;
@@ -22,7 +7,10 @@ export class AnkiClient {
     this.baseUrl = `http://localhost:${port}`;
   }
 
-  private async invoke<T = string[] | number>(action: string, params?: any): Promise<T> {
+  private async invoke<T = string[] | number>(
+    action: string,
+    params?: AnkiRequestParams
+  ): Promise<T> {
     const response = await fetch(this.baseUrl, {
       method: 'POST',
       body: JSON.stringify({
