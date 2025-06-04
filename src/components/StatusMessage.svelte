@@ -3,6 +3,12 @@
   export let type: 'success' | 'error' | '' = '';
 </script>
 
+{#if message}
+  <div class="status-message {type} visible">
+    {message}
+  </div>
+{/if}
+
 <style>
   .status-message {
     margin-top: 12px;
@@ -26,9 +32,3 @@
     border: 1px solid #ffab91;
   }
 </style>
-
-{#if message}
-  <div class="status-message {type} visible">
-    {message}
-  </div>
-{/if} 

@@ -52,14 +52,6 @@
   fetchWordData();
 </script>
 
-<style>
-  .container {
-    font-family: system-ui, -apple-system, sans-serif;
-    padding: 20px;
-    margin: 0;
-  }
-</style>
-
 <div class="container">
   {#if isLoading}
     <LoadingSpinner />
@@ -68,4 +60,15 @@
   {:else}
     <UnsupportedMessage />
   {/if}
-</div> 
+</div>
+
+<style>
+  .container {
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    padding: 20px;
+    margin: 0;
+  }
+</style>

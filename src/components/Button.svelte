@@ -4,6 +4,14 @@
   export let type: 'button' | 'submit' = 'button';
 </script>
 
+<button {type} {disabled} on:click>
+  {#if loading}
+    <slot name="loading">Loading...</slot>
+  {:else}
+    <slot />
+  {/if}
+</button>
+
 <style>
   button {
     background: #4caf50;
@@ -23,11 +31,3 @@
     background: #45a049;
   }
 </style>
-
-<button {type} {disabled} on:click>
-  {#if loading}
-    <slot name="loading">Loading...</slot>
-  {:else}
-    <slot />
-  {/if}
-</button> 

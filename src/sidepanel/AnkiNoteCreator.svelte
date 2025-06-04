@@ -5,6 +5,7 @@
   import StatusMessage from '../components/StatusMessage.svelte';
   import AnkiSettings from '../components/AnkiSettings.svelte';
   import WordDataField from '../components/WordDataField.svelte';
+  import ConnectionError from '../components/ConnectionError.svelte';
 
   export let wordData: WordData | undefined;
 
@@ -16,12 +17,14 @@
   let fieldMappings = {
     word: '',
     pronounce: '',
-    definition: ''
+    definition: '',
   };
   let allowDuplicate = false;
   let statusMessage = '';
   let statusType: 'success' | 'error' | '' = '';
   let isProcessing = false;
+  let hasConnectionError = false;
+  let configuredPort = '8765';
 
   // Clear status message after a delay
   function clearStatusAfterDelay(shouldClose = false) {
@@ -41,37 +44,38 @@
         selectedDeck,
         selectedModel,
         fieldMappings,
-        allowDuplicate
-      }
+        allowDuplicate,
+      },
     });
   }
 
   // Load user preferences
   async function loadPreferences() {
-    const result = await chrome.storage.sync.get('ankiPreferences');
+    const result = await chrome.storage.sync.get(['ankiPreferences', 'ankiConnectPort']);
     if (result.ankiPreferences) {
       selectedDeck = result.ankiPreferences.selectedDeck || '';
       selectedModel = result.ankiPreferences.selectedModel || '';
       fieldMappings = result.ankiPreferences.fieldMappings || {
         word: '',
         pronounce: '',
-        definition: ''
+        definition: '',
       };
       allowDuplicate = result.ankiPreferences.allowDuplicate || false;
+    }
+    if (result.ankiConnectPort) {
+      configuredPort = result.ankiConnectPort;
     }
   }
 
   // Initialize AnkiClient and fetch decks and models when component mounts
   async function fetchDecksAndModels() {
     try {
+      await loadPreferences();
       const ankiClient = new AnkiClient();
-      
+
       // Fetch decks and models
       decks = await ankiClient.getDeckNames();
       models = await ankiClient.getModelNames();
-
-      // Load saved preferences
-      await loadPreferences();
 
       // If saved deck/model doesn't exist anymore, use first available
       if (!decks.includes(selectedDeck)) {
@@ -82,10 +86,10 @@
       }
 
       await updateModelFields();
+      hasConnectionError = false;
     } catch (error) {
       console.error('Failed to fetch decks and models:', error);
-      statusMessage = 'Failed to communicate with AnkiConnect. Is it running?';
-      statusType = 'error';
+      hasConnectionError = true;
     }
   }
 
@@ -94,27 +98,35 @@
     try {
       const ankiClient = new AnkiClient();
       modelFields = await ankiClient.getModelFieldNames(selectedModel);
-      
+
       // If we have saved mappings for this model and they're valid, use them
       const savedMappings = fieldMappings;
-      const validMappings = Object.values(savedMappings).every(field => 
-        field === '' || modelFields.includes(field)
+      const validMappings = Object.values(savedMappings).every(
+        (field) => field === '' || modelFields.includes(field)
       );
 
       if (!validMappings) {
         // Try to intelligently map fields
         fieldMappings = {
-          word: modelFields.find(f => 
-            f.toLowerCase().includes('word') || 
-            f.toLowerCase().includes('phrase')
-          ) || modelFields[0] ||'',
-          pronounce: modelFields.find(f => 
-            f.toLowerCase().includes('pronounce')
-          ) || modelFields[1] || modelFields[0] || '',
-          definition: modelFields.find(f => 
-            f.toLowerCase().includes('definition') || 
-            f.toLowerCase().includes('meaning')
-          ) || modelFields[2] || modelFields[1] || modelFields[0] || ''
+          word:
+            modelFields.find(
+              (f) => f.toLowerCase().includes('word') || f.toLowerCase().includes('phrase')
+            ) ||
+            modelFields[0] ||
+            '',
+          pronounce:
+            modelFields.find((f) => f.toLowerCase().includes('pronounce')) ||
+            modelFields[1] ||
+            modelFields[0] ||
+            '',
+          definition:
+            modelFields.find(
+              (f) => f.toLowerCase().includes('definition') || f.toLowerCase().includes('meaning')
+            ) ||
+            modelFields[2] ||
+            modelFields[1] ||
+            modelFields[0] ||
+            '',
         };
       }
 
@@ -127,13 +139,13 @@
   async function addToAnki() {
     console.log('addToAnki', wordData);
     if (!wordData) return;
-    
+
     try {
       isProcessing = true;
       const ankiClient = new AnkiClient();
       const fields: { [key: string]: string } = {};
       const fieldContents: { [key: string]: string[] } = {};
-      
+
       // First, collect all content for each Anki field
       Object.entries(fieldMappings).forEach(([dataField, ankiField]) => {
         if (ankiField && wordData[dataField as keyof WordData]) {
@@ -172,9 +184,88 @@
     }
   }
 
+  function openOptions() {
+    chrome.runtime.openOptionsPage();
+  }
+
   // Fetch decks and models when component mounts
   fetchDecksAndModels();
 </script>
+
+<div class="word-card">
+  {#if hasConnectionError}
+    <ConnectionError on:click={openOptions} port={configuredPort} />
+  {:else}
+    <AnkiSettings
+      {decks}
+      {models}
+      bind:selectedDeck
+      bind:selectedModel
+      disabled={isProcessing}
+      onDeckChange={savePreferences}
+      onModelChange={updateModelFields}
+    />
+
+    <div class="group">
+      <div class="group-title">Word Data</div>
+      <WordDataField
+        label="Word or Phrase"
+        value={wordData?.word ?? ''}
+        {modelFields}
+        bind:selectedField={fieldMappings.word}
+        disabled={isProcessing}
+        on:change={savePreferences}
+      />
+
+      <WordDataField
+        label="Pronounce"
+        value={wordData?.pronounce ?? ''}
+        {modelFields}
+        bind:selectedField={fieldMappings.pronounce}
+        disabled={isProcessing}
+        on:change={savePreferences}
+      />
+
+      <WordDataField
+        label="Definition"
+        value={wordData?.definition ?? ''}
+        {modelFields}
+        bind:selectedField={fieldMappings.definition}
+        disabled={isProcessing}
+        on:change={savePreferences}
+      />
+    </div>
+
+    <div class="button-container">
+      <Button
+        on:click={addToAnki}
+        disabled={!wordData?.word ||
+          !wordData?.definition ||
+          !selectedDeck ||
+          !selectedModel ||
+          !fieldMappings.word ||
+          !fieldMappings.definition ||
+          isProcessing}
+        loading={isProcessing}
+      >
+        <svelte:fragment slot="loading">Adding...</svelte:fragment>
+        Add to Anki
+      </Button>
+      <div class="checkbox-container">
+        <input
+          type="checkbox"
+          id="allowDuplicate"
+          bind:checked={allowDuplicate}
+          on:change={savePreferences}
+          disabled={isProcessing}
+        />
+        <label for="allowDuplicate" class:disabled={isProcessing}>Allow duplicate</label>
+      </div>
+    </div>
+
+    <StatusMessage message={statusMessage} type={statusType} />
+  {/if}
+</div>
 
 <style>
   .word-card {
@@ -211,11 +302,11 @@
     color: #666;
     font-size: 14px;
   }
-  input[type="checkbox"] {
+  input[type='checkbox'] {
     margin: 0;
     cursor: pointer;
   }
-  input[type="checkbox"]:disabled {
+  input[type='checkbox']:disabled {
     cursor: not-allowed;
   }
   label {
@@ -226,68 +317,3 @@
     opacity: 0.7;
   }
 </style>
-
-<div class="word-card">
-  <AnkiSettings
-    {decks}
-    {models}
-    bind:selectedDeck
-    bind:selectedModel
-    disabled={isProcessing}
-    onDeckChange={savePreferences}
-    onModelChange={updateModelFields}
-  />
-
-  <div class="group">
-    <div class="group-title">Word Data</div>
-    <WordDataField
-      label="Word or Phrase"
-      value={wordData?.word ?? ''}
-      {modelFields}
-      bind:selectedField={fieldMappings.word}
-      disabled={isProcessing}
-      on:change={savePreferences}
-    />
-
-    <WordDataField
-      label="Pronounce"
-      value={wordData?.pronounce ?? ''}
-      {modelFields}
-      bind:selectedField={fieldMappings.pronounce}
-      disabled={isProcessing}
-      on:change={savePreferences}
-    />
-
-    <WordDataField
-      label="Definition"
-      value={wordData?.definition ?? ''}
-      {modelFields}
-      bind:selectedField={fieldMappings.definition}
-      disabled={isProcessing}
-      on:change={savePreferences}
-    />
-  </div>
-
-  <div class="button-container">
-    <Button
-      on:click={addToAnki}
-      disabled={!wordData?.word || !wordData?.definition || !selectedDeck || !selectedModel || !fieldMappings.word || !fieldMappings.definition || isProcessing}
-      loading={isProcessing}
-    >
-      <svelte:fragment slot="loading">Adding...</svelte:fragment>
-      Add to Anki
-    </Button>
-    <div class="checkbox-container">
-      <input 
-        type="checkbox" 
-        id="allowDuplicate" 
-        bind:checked={allowDuplicate} 
-        on:change={savePreferences}
-        disabled={isProcessing}
-      >
-      <label for="allowDuplicate" class:disabled={isProcessing}>Allow duplicate</label>
-    </div>
-  </div>
-
-  <StatusMessage message={statusMessage} type={statusType} />
-</div> 

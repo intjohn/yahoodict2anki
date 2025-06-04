@@ -8,6 +8,27 @@
   export let onModelChange: (event: Event) => void;
 </script>
 
+<div class="group">
+  <div class="group-title">Anki Settings</div>
+  <div class="select-container">
+    <div class="field-label">Deck</div>
+    <select bind:value={selectedDeck} on:change={onDeckChange} {disabled}>
+      {#each decks as deck}
+        <option value={deck}>{deck}</option>
+      {/each}
+    </select>
+  </div>
+
+  <div class="select-container">
+    <div class="field-label">Note Type</div>
+    <select bind:value={selectedModel} on:change={onModelChange} {disabled}>
+      {#each models as model}
+        <option value={model}>{model}</option>
+      {/each}
+    </select>
+  </div>
+</div>
+
 <style>
   .group {
     border: 1px solid #eee;
@@ -36,35 +57,14 @@
   }
   select {
     width: 100%;
-    padding: 8px;
+    padding: 6px 8px;
+    font-size: 0.8rem;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 14px;
-    margin-top: 5px;
+    background-color: white;
   }
   select:disabled {
     background: #f5f5f5;
     cursor: not-allowed;
   }
 </style>
-
-<div class="group">
-  <div class="group-title">Anki Settings</div>
-  <div class="select-container">
-    <div class="field-label">Deck</div>
-    <select bind:value={selectedDeck} on:change={onDeckChange} {disabled}>
-      {#each decks as deck}
-        <option value={deck}>{deck}</option>
-      {/each}
-    </select>
-  </div>
-
-  <div class="select-container">
-    <div class="field-label">Note Type</div>
-    <select bind:value={selectedModel} on:change={onModelChange} {disabled}>
-      {#each models as model}
-        <option value={model}>{model}</option>
-      {/each}
-    </select>
-  </div>
-</div> 

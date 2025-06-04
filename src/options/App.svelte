@@ -1,7 +1,7 @@
 <script lang="ts">
   import Button from '../components/Button.svelte';
   import StatusMessage from '../components/StatusMessage.svelte';
-  
+
   let port = '8765';
   let statusMessage = '';
   let statusType: 'success' | 'error' | '' = '';
@@ -42,12 +42,27 @@
   }
 </script>
 
+<div class="container">
+  <h1>Yahoo Dictionary to Anki Options</h1>
+
+  <div class="form-group">
+    <label for="port">AnkiConnect Port:</label>
+    <input type="number" id="ankiConnectPort" bind:value={port} min="1" max="65535" />
+  </div>
+
+  <Button on:click={savePort}>Save</Button>
+  <StatusMessage message={statusMessage} type={statusType} />
+</div>
+
 <style>
   .container {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
   }
   .form-group {
     margin-bottom: 20px;
@@ -72,21 +87,3 @@
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
   }
 </style>
-
-<div class="container">
-  <h1>Yahoo Dictionary to Anki Options</h1>
-  
-  <div class="form-group">
-    <label for="port">AnkiConnect Port:</label>
-    <input
-      type="number"
-      id="ankiConnectPort"
-      bind:value={port}
-      min="1"
-      max="65535"
-    />
-  </div>
-
-  <Button on:click={savePort}>Save</Button>
-  <StatusMessage message={statusMessage} type={statusType} />
-</div> 

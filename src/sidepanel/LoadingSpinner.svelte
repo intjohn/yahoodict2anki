@@ -2,6 +2,10 @@
   export let size: number = 40;
 </script>
 
+<div class="spinner-container">
+  <div class="spinner" style="width: {size}px; height: {size}px;"></div>
+</div>
+
 <style>
   .spinner {
     display: inline-block;
@@ -12,8 +16,12 @@
   }
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 
   .spinner-container {
@@ -23,10 +31,3 @@
     min-height: 200px;
   }
 </style>
-
-<div class="spinner-container">
-  <div 
-    class="spinner" 
-    style="width: {size}px; height: {size}px;"
-  ></div>
-</div> 
