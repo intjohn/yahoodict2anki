@@ -5,7 +5,7 @@
   import StatusMessage from '../components/StatusMessage.svelte';
   import AnkiSettings from '../components/AnkiSettings.svelte';
   import WordDataField from '../components/WordDataField.svelte';
-  import ConnectionError from '../components/ConnectionError.svelte';
+  import ConnectionError from './ConnectionError.svelte';
 
   export let wordData: WordData | undefined;
 
@@ -21,20 +21,31 @@
   };
   let allowDuplicate = false;
   let statusMessage = '';
-  let statusType: 'success' | 'error' | '' = '';
+  let status: 'success' | 'error' | '' = '';
   let isProcessing = false;
   let hasConnectionError = false;
-  let configuredPort = '8765';
+  let ankiClientPort = '8765';
+  let ankiClient: AnkiClient | null = null;
+
+  function getAnkiClient(port?: string): AnkiClient {
+    if (port) {
+      const portNumber =parseInt(port);
+      if (1 <= portNumber && portNumber <= 65535 && port !== ankiClientPort) {
+        ankiClientPort = port;
+        ankiClient = new AnkiClient(portNumber);
+      }
+    }
+    if (!ankiClient) {
+      ankiClient = new AnkiClient(parseInt(ankiClientPort));
+    }
+    return ankiClient;
+  }
 
   // Clear status message after a delay
-  function clearStatusAfterDelay(shouldClose = false) {
+  function closeAfterDelay() {
     setTimeout(() => {
-      statusMessage = '';
-      statusType = '';
-      if (shouldClose) {
-        window.close();
-      }
-    }, 2000);
+      window.close();
+    }, 1200);
   }
 
   // Save user preferences
@@ -63,7 +74,7 @@
       allowDuplicate = result.ankiPreferences.allowDuplicate || false;
     }
     if (result.ankiConnectPort) {
-      configuredPort = result.ankiConnectPort;
+      getAnkiClient(result.ankiConnectPort);
     }
   }
 
@@ -71,11 +82,11 @@
   async function fetchDecksAndModels() {
     try {
       await loadPreferences();
-      const ankiClient = new AnkiClient();
+      const client = getAnkiClient();
 
       // Fetch decks and models
-      decks = await ankiClient.getDeckNames();
-      models = await ankiClient.getModelNames();
+      decks = await client.getDeckNames();
+      models = await client.getModelNames();
 
       // If saved deck/model doesn't exist anymore, use first available
       if (!decks.includes(selectedDeck)) {
@@ -88,7 +99,8 @@
       await updateModelFields();
       hasConnectionError = false;
     } catch (error) {
-      console.error('Failed to fetch decks and models:', error);
+      // There's a connection error when attempting to connect to Anki
+      // Display connection error message
       hasConnectionError = true;
     }
   }
@@ -96,8 +108,8 @@
   // Update model fields when model selection changes
   async function updateModelFields() {
     try {
-      const ankiClient = new AnkiClient();
-      modelFields = await ankiClient.getModelFieldNames(selectedModel);
+      const client = getAnkiClient();
+      modelFields = await client.getModelFieldNames(selectedModel);
 
       // If we have saved mappings for this model and they're valid, use them
       const savedMappings = fieldMappings;
@@ -132,17 +144,18 @@
 
       await savePreferences();
     } catch (error) {
-      console.error('Failed to fetch model fields:', error);
+      // There's a connection error when attempting to connect to Anki
+      // Display connection error message
+      hasConnectionError = true;
     }
   }
 
   async function addToAnki() {
-    console.log('addToAnki', wordData);
     if (!wordData) return;
 
     try {
       isProcessing = true;
-      const ankiClient = new AnkiClient();
+      const client = getAnkiClient();
       const fields: { [key: string]: string } = {};
       const fieldContents: { [key: string]: string[] } = {};
 
@@ -161,7 +174,7 @@
         fields[ankiField] = contents.join('<br/>');
       });
 
-      await ankiClient.addNote({
+      await client.addNote({
         deckName: selectedDeck,
         modelName: selectedModel,
         fields,
@@ -171,15 +184,16 @@
         tags: ['yahoo2anki'],
       });
       statusMessage = 'Card added successfully!';
-      statusType = 'success';
-      clearStatusAfterDelay(true);
+      status = 'success';
+      isProcessing = false;
+      closeAfterDelay();
     } catch (error) {
       if (error instanceof Error) {
         statusMessage = `Failed to add note: ${error.message}`;
       } else {
         statusMessage = 'Failed to communicate with AnkiConnect. Is it running?';
       }
-      statusType = 'error';
+      status = 'error';
       isProcessing = false;
     }
   }
@@ -194,7 +208,7 @@
 
 <div class="word-card">
   {#if hasConnectionError}
-    <ConnectionError on:click={openOptions} port={configuredPort} />
+    <ConnectionError on:click={openOptions} port={ankiClientPort} />
   {:else}
     <AnkiSettings
       {decks}
@@ -245,11 +259,14 @@
           !selectedModel ||
           !fieldMappings.word ||
           !fieldMappings.definition ||
-          isProcessing}
-        loading={isProcessing}
+          isProcessing ||
+          status === 'success'}
       >
-        <svelte:fragment slot="loading">Adding...</svelte:fragment>
-        Add to Anki
+        {#if status === 'success'}
+          Done
+        {:else}
+          Add to Anki
+        {/if}
       </Button>
       <div class="checkbox-container">
         <input
@@ -263,7 +280,7 @@
       </div>
     </div>
 
-    <StatusMessage message={statusMessage} type={statusType} />
+    <StatusMessage message={statusMessage} type={status} />
   {/if}
 </div>
 

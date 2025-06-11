@@ -1,10 +1,28 @@
 import type { WordData, ContentScriptMessage } from '../types';
 
+function encode(html: string): string {
+  const text = document.createTextNode(html);
+  const p = document.createElement('p');
+  p.appendChild(text);
+  return p.innerHTML;
+}
+
 // Extract word data from the page
 function getWordData(): WordData {
-  const word = document.querySelector('.grp > .compTitle')?.textContent?.trim();
-  const pronounce = document.querySelector('.grp > .compList')?.textContent?.trim();
-  const definition = document.querySelector('.grp > .compList:last-child')?.textContent?.trim();
+  const word = encode(document.querySelector('.grp > .compTitle')?.textContent?.trim() || '');
+  let pronounce = '';
+  let definitionNode;
+  const contentList = document.querySelectorAll('.grp > .compList');
+
+  if (contentList.length > 1) {
+    pronounce = encode(contentList[0].textContent?.trim() || '');
+    definitionNode = contentList[1];
+  } else {
+    definitionNode = contentList[0];
+  }
+  const definition = [...definitionNode.querySelectorAll('li')]
+    .map((li) => encode(li.textContent?.trim() || ''))
+    .join('<br>');
   return { word, pronounce, definition };
 }
 

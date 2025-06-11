@@ -68,9 +68,13 @@ export class SidePanel {
       SidePanel.status = 'pending';
       SidePanel.currentHost = tab.url ? new URL(tab.url).hostname : '';
       SidePanel.setupLivenessConnection();
-      SidePanel.injectContentScript(tabId, () => {
+      if (SidePanel.isRestricted(tab)) {
         chrome.sidePanel.open({ tabId });
-      });
+      } else {
+        SidePanel.injectContentScript(tabId, () => {
+          chrome.sidePanel.open({ tabId });
+        });
+      }
     }
   }
 
@@ -121,5 +125,14 @@ export class SidePanel {
         SidePanel.currentHost = null;
       });
     }
+  }
+
+  /**
+   * Checks if the tab is restricted
+   * @param tab - The tab to check
+   * @returns True if the tab is restricted, false otherwise
+   */
+  private static isRestricted(tab: chrome.tabs.Tab): boolean {
+    return tab.url?.startsWith('chrome://') || tab.url?.startsWith('chrome-extension://') || false;
   }
 }

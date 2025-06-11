@@ -8,7 +8,6 @@
 
 <style>
   .unsupported-message {
-    text-align: center;
     padding: 40px 20px;
     color: #666;
   }

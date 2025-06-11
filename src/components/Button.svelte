@@ -1,15 +1,10 @@
 <script lang="ts">
   export let disabled = false;
-  export let loading = false;
   export let type: 'button' | 'submit' = 'button';
 </script>
 
 <button {type} {disabled} on:click>
-  {#if loading}
-    <slot name="loading">Loading...</slot>
-  {:else}
-    <slot />
-  {/if}
+  <slot />
 </button>
 
 <style>

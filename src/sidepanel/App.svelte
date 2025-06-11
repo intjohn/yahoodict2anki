@@ -19,9 +19,18 @@
           { type: 'GET_WORD_DATA' },
           { frameId: 0 },
           (data: WordData | undefined) => {
-            wordData = data;
-            isSupported = !!(data && (data.word || data.definition));
-            isLoading = false;
+            const error = chrome.runtime.lastError;
+            if (error) {
+              // This might happen when side panel open for a restricted tab,
+              // e.g. chrome://extensions
+              // where content script is not allowed to run
+              isSupported = false;
+              isLoading = false;
+            } else {
+              wordData = data;
+              isSupported = !!(data && (data.word || data.definition));
+              isLoading = false;
+            }
           }
         );
       } else {

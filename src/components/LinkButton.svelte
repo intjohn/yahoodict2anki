@@ -7,12 +7,15 @@
 
 <style>
   .link-button {
-    color: inherit;
+    color: #096ac0;
     text-decoration: underline;
     background: none;
     border: none;
     padding: 0;
     font: inherit;
     cursor: pointer;
+  }
+  .link-button:hover {
+    color: #3b86c8;
   }
 </style>
