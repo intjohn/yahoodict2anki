@@ -7,6 +7,22 @@ function encode(html: string): string {
   return p.innerHTML;
 }
 
+function parseDefinitionLine(li: HTMLElement): string {
+  if (li.children.length > 1) {
+    return `
+      <div class="y2a-def-line">
+        <div class="y2a-part-of-speech">
+          ${encode(li.children[0].textContent?.trim() || '')}
+        </div>
+        <div class="y2a-definition">
+          ${encode(li.children[1].textContent?.trim() || '')}
+        </div>
+      </div>
+    `;
+  }
+  return `<div class="y2a-def-line">${encode(li.textContent?.trim() || '')}</div>`;
+}
+
 // Extract word data from the page
 function getWordData(): WordData {
   const word = encode(document.querySelector('.grp > .compTitle')?.textContent?.trim() || '');
@@ -20,9 +36,7 @@ function getWordData(): WordData {
   } else {
     definitionNode = contentList[0];
   }
-  const definition = [...definitionNode.querySelectorAll('li')]
-    .map((li) => encode(li.textContent?.trim() || ''))
-    .join('<br>');
+  const definition = [...definitionNode.querySelectorAll('li')].map(parseDefinitionLine).join('');
   return { word, pronounce, definition };
 }
 
