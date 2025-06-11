@@ -12,7 +12,7 @@ chrome.runtime.onInstalled.addListener(() => {
 // Handle context menu click
 chrome.contextMenus.onClicked.addListener((info: chrome.contextMenus.OnClickData) => {
   if (info.menuItemId === 'lookup-yahoo-dict' && info.selectionText) {
-    const yahooUrl = `https://tw.dictionary.yahoo.com/search?p=${encodeURIComponent(info.selectionText)}`;
+    const yahooUrl = `https://tw.dictionary.search.yahoo.com/search?p=${encodeURIComponent(info.selectionText)}`;
     chrome.tabs.create({ url: yahooUrl });
   }
 });

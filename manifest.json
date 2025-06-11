@@ -1,16 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "Yahoo Dictionary to Anki",
-  "version": "1.0",
-  "description": "Create an Anki flashcard from Yahoo dictionary search results.",
+  "name": "Yahoo Dictionary to Anki Note BETA",
+  "version": "0.0.1.001",
+  "description": "THIS EXTENSION IS FOR BETA TESTING. Create an Anki flashcard from Yahoo dictionary search results.",
   "icons": {
     "16": "images/icon.png",
     "32": "images/icon.png",
     "48": "images/icon.png",
     "128": "images/icon.png"
   },
-  "permissions": ["scripting", "activeTab", "sidePanel", "tabs", "storage", "contextMenus"],
-  "host_permissions": ["http://localhost/*", "https://tw.dictionary.yahoo.com/*"],
+  "permissions": ["scripting", "activeTab", "sidePanel", "storage", "contextMenus"],
+  "host_permissions": ["http://localhost/*", "https://tw.dictionary.search.yahoo.com/*"],
   "action": {
     "default_icon": "images/icon.png"
   },

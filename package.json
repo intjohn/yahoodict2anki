@@ -1,6 +1,6 @@
 {
   "name": "yahoo_to_anki",
-  "version": "1.0.0",
+  "version": "0.0.1.0",
   "description": "Chrome extension to create Anki flashcards from Yahoo dictionary search results",
   "type": "module",
   "scripts": {
@@ -11,9 +11,10 @@
     "lint:fix": "eslint . --ext .js,.ts --fix",
     "prettier": "prettier --write \"**/*.{js,ts,json,html,css}\"",
     "prettier:check": "prettier --check \"**/*.{js,ts,json,html,css}\"",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist dist.zip",
     "prebuild": "pnpm clean",
-    "postbuild": "copyfiles manifest.json \"images/**/*\" dist/ && copyfiles -f src/sidepanel/sidepanel.html dist/sidepanel/"
+    "postbuild": "copyfiles manifest.json \"images/**/*\" dist/ && copyfiles -f src/sidepanel/sidepanel.html dist/sidepanel/",
+    "package": "cd dist && zip -r ../dist.zip ."
   },
   "keywords": [
     "chrome-extension",
