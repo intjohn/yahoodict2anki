@@ -1,56 +1,61 @@
 <script lang="ts">
   import Button from '../components/Button.svelte';
   import StatusMessage from '../components/StatusMessage.svelte';
+  import NumberInput from '../components/NumberInput.svelte';
+  import { loadUserOptions, saveUserOptions, isPortValid } from '../utils/userOptions';
+  import { onMount } from 'svelte';
 
-  let port = '8765';
-  let statusMessage = '';
-  let statusType: 'success' | 'error' | '' = '';
+  let port = $state('');
+  let statusMessage = $state('');
+  let statusType: 'success' | 'error' | '' = $state('');
 
-  // Load saved port when component mounts
-  chrome.storage.sync.get(['ankiConnectPort'], (result) => {
-    if (result.ankiConnectPort) {
-      port = result.ankiConnectPort;
-    }
+  let portErrorMessage = $state('');
+
+  // Load options when component mounts
+  onMount(async () => {
+    const options = await loadUserOptions();
+    port = options.anki.port.toString();
   });
 
-  // Save port when it changes
-  function savePort() {
-    const portNumber = parseInt(port, 10);
-    if (isNaN(portNumber) || portNumber < 1 || portNumber > 65535) {
-      statusMessage = 'Please enter a valid port number (1-65535)';
-      statusType = 'error';
+  const checkPort = () => {
+    console.log('checkPort', port);
+    portErrorMessage = isPortValid(parseInt(port, 10))
+      ? ''
+      : 'Please enter a valid port number (1-65535)';
+  };
+
+  // Save options
+  const submit = async () => {
+    try {
+      await saveUserOptions({ anki: { port: parseInt(port, 10) } });
+      statusMessage = 'Options saved.';
+      statusType = 'success';
       setTimeout(() => {
         statusMessage = '';
         statusType = '';
       }, 3000);
-      return;
+    } catch (error) {
+      statusMessage = `Failed to save options: ${error}`;
+      statusType = 'error';
     }
-
-    chrome.storage.sync.set(
-      {
-        ankiConnectPort: port,
-      },
-      () => {
-        statusMessage = 'Options saved.';
-        statusType = 'success';
-        setTimeout(() => {
-          statusMessage = '';
-          statusType = '';
-        }, 3000);
-      }
-    );
-  }
+  };
 </script>
 
 <div class="container">
   <h1>Yahoo Dictionary to Anki Options</h1>
 
   <div class="form-group">
-    <label for="port">AnkiConnect Port:</label>
-    <input type="number" id="ankiConnectPort" bind:value={port} min="1" max="65535" />
+    <NumberInput
+      label="AnkiConnect Port"
+      bind:value={port}
+      min={1}
+      max={65535}
+      errorMessage={portErrorMessage}
+      on:input={checkPort}
+    />
   </div>
 
-  <Button on:click={savePort}>Save</Button>
+  <Button on:click={submit}>Save</Button>
   <StatusMessage message={statusMessage} type={statusType} />
 </div>
 
@@ -66,24 +71,5 @@
   }
   .form-group {
     margin-bottom: 20px;
-  }
-  label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: #333;
-  }
-  input {
-    width: 100%;
-    max-width: 200px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-  }
-  input:focus {
-    outline: none;
-    border-color: #4caf50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
   }
 </style>

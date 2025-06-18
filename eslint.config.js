@@ -3,6 +3,7 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
+import sveltePlugin from 'eslint-plugin-svelte';
 
 export default [
   {
@@ -64,4 +65,20 @@ export default [
     },
   },
   prettier,
+  // Svelte specific configuration
+  ...sveltePlugin.configs.recommended,
+  {
+    files: ['**/*.svelte'],
+    languageOptions: {
+      parserOptions: {
+        extraFileExtensions: ['.svelte'],
+        parser: tsparser,
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.es2021,
+        chrome: 'readonly',
+      },
+    },
+  },
 ];

@@ -1,4 +1,4 @@
-import { SidePanelMessage } from '../types';
+import { SidePanelMessage } from '../extension';
 
 type SidePanelStatus = 'open' | 'closed' | 'pending';
 

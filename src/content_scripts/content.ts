@@ -1,4 +1,5 @@
-import type { WordData, ContentScriptMessage } from '../types';
+import type { WordData } from '../wordData';
+import type { ContentScriptMessage } from '../extension';
 
 function encode(html: string): string {
   const text = document.createTextNode(html);

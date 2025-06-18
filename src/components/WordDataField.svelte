@@ -12,7 +12,7 @@
   <div class="field-mapping">
     <select bind:value={selectedField} on:change {disabled}>
       <option value="">-- Map to field --</option>
-      {#each modelFields as field}
+      {#each modelFields as field (field)}
         <option value={field}>{field}</option>
       {/each}
     </select>

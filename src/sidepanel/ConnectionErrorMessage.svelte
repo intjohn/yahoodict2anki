@@ -9,8 +9,10 @@
   <ul>
     <li>Anki is running</li>
     <li>AnkiConnect add-on is installed</li>
-    <li>Port used to connect to AnkiConnect (currently {port}) is configured correctly. You can edit configuration in the extension <LinkButton
-    on:click>options</LinkButton>.</li>
+    <li>
+      Port used to connect to AnkiConnect (currently {port}) is configured correctly. You can edit
+      configuration in the extension <LinkButton on:click>options</LinkButton>.
+    </li>
   </ul>
 </div>
 

@@ -1,45 +1,30 @@
 <script lang="ts">
-  import type { WordData } from '../types';
-  import { AnkiClient } from '../utils/AnkiClient';
+  import { yahooFields, type WordData, type YahooDataField } from '../wordData';
+  import type { UserPreferences } from '../types/preferences';
   import Button from '../components/Button.svelte';
   import StatusMessage from '../components/StatusMessage.svelte';
   import AnkiSettings from '../components/AnkiSettings.svelte';
   import WordDataField from '../components/WordDataField.svelte';
-  import ConnectionError from './ConnectionError.svelte';
+  import ConnectionError from './ConnectionErrorMessage.svelte';
+  import Checkbox from '../components/Checkbox.svelte';
+  import { getAnkiClient } from './singletons/ankiClientSingleton';
+  import { getOptions } from './singletons/optionsSingleton';
+  import { AnkiConnectionError } from '../utils/ankiClient';
+  import { DEFAULT_PREFERENCES } from '../types/preferences';
+  import { loadUserPreferences, saveUserPreferences } from '../utils/userPreferences';
 
-  export let wordData: WordData | undefined;
+  let { wordData }: { wordData: WordData } = $props();
 
-  let decks: string[] = [];
-  let models: string[] = [];
-  let selectedDeck = '';
-  let selectedModel = '';
-  let modelFields: string[] = [];
-  let fieldMappings = {
-    word: '',
-    pronounce: '',
-    definition: '',
-  };
-  let allowDuplicate = false;
-  let statusMessage = '';
-  let status: 'success' | 'error' | '' = '';
-  let isProcessing = false;
-  let hasConnectionError = false;
-  let ankiClientPort = '8765';
-  let ankiClient: AnkiClient | null = null;
-
-  function getAnkiClient(port?: string): AnkiClient {
-    if (port) {
-      const portNumber =parseInt(port);
-      if (1 <= portNumber && portNumber <= 65535 && port !== ankiClientPort) {
-        ankiClientPort = port;
-        ankiClient = new AnkiClient(portNumber);
-      }
-    }
-    if (!ankiClient) {
-      ankiClient = new AnkiClient(parseInt(ankiClientPort));
-    }
-    return ankiClient;
-  }
+  let decks: string[] = $state([]);
+  let models: string[] = $state([]);
+  let modelFields: string[] = $state([]);
+  let userPreferences: UserPreferences = $state(DEFAULT_PREFERENCES);
+  let statusMessage = $state('');
+  let status: 'success' | 'error' | '' = $state('');
+  let isProcessing = $state(false);
+  let hasConnectionError = $state(false);
+  let ankiClientPort = $state('');
+  let fieldMapping: string[] = $state(Array(yahooFields.length).fill(''));
 
   // Clear status message after a delay
   function closeAfterDelay() {
@@ -48,102 +33,69 @@
     }, 1200);
   }
 
-  // Save user preferences
-  async function savePreferences() {
-    await chrome.storage.sync.set({
-      ankiPreferences: {
-        selectedDeck,
-        selectedModel,
-        fieldMappings,
-        allowDuplicate,
-      },
-    });
-  }
-
-  // Load user preferences
-  async function loadPreferences() {
-    const result = await chrome.storage.sync.get(['ankiPreferences', 'ankiConnectPort']);
-    if (result.ankiPreferences) {
-      selectedDeck = result.ankiPreferences.selectedDeck || '';
-      selectedModel = result.ankiPreferences.selectedModel || '';
-      fieldMappings = result.ankiPreferences.fieldMappings || {
-        word: '',
-        pronounce: '',
-        definition: '',
-      };
-      allowDuplicate = result.ankiPreferences.allowDuplicate || false;
-    }
-    if (result.ankiConnectPort) {
-      getAnkiClient(result.ankiConnectPort);
+  // Update user preferences
+  async function updateUserPreferences() {
+    if (userPreferences.selectedModel) {
+      userPreferences.fieldMappings[userPreferences.selectedModel] = [...fieldMapping];
+      await saveUserPreferences($state.snapshot(userPreferences));
     }
   }
 
   // Initialize AnkiClient and fetch decks and models when component mounts
   async function fetchDecksAndModels() {
     try {
-      await loadPreferences();
-      const client = getAnkiClient();
+      userPreferences = await loadUserPreferences();
+      const client = await getAnkiClient();
 
       // Fetch decks and models
       decks = await client.getDeckNames();
       models = await client.getModelNames();
 
       // If saved deck/model doesn't exist anymore, use first available
-      if (!decks.includes(selectedDeck)) {
-        selectedDeck = decks[0] || '';
+      if (!decks.includes(userPreferences.selectedDeck)) {
+        userPreferences.selectedDeck = decks[0] || '';
       }
-      if (!models.includes(selectedModel)) {
-        selectedModel = models[0] || '';
+      if (!models.includes(userPreferences.selectedModel)) {
+        userPreferences.selectedModel = models[0] || '';
       }
 
-      await updateModelFields();
+      await mapFields();
       hasConnectionError = false;
     } catch (error) {
-      // There's a connection error when attempting to connect to Anki
-      // Display connection error message
-      hasConnectionError = true;
+      if (error instanceof AnkiConnectionError) {
+        hasConnectionError = true;
+        ankiClientPort = (await getOptions()).anki.port.toString();
+      }
     }
   }
 
   // Update model fields when model selection changes
-  async function updateModelFields() {
+  async function mapFields() {
     try {
-      const client = getAnkiClient();
-      modelFields = await client.getModelFieldNames(selectedModel);
+      const client = await getAnkiClient();
+      modelFields = await client.getModelFieldNames(userPreferences.selectedModel);
 
       // If we have saved mappings for this model and they're valid, use them
-      const savedMappings = fieldMappings;
-      const validMappings = Object.values(savedMappings).every(
-        (field) => field === '' || modelFields.includes(field)
-      );
+      const savedMapping =
+        userPreferences.fieldMappings[userPreferences.selectedModel] || ([] as string[]);
 
-      if (!validMappings) {
-        // Try to intelligently map fields
-        fieldMappings = {
-          word:
-            modelFields.find(
-              (f) => f.toLowerCase().includes('word') || f.toLowerCase().includes('phrase')
-            ) ||
-            modelFields[0] ||
-            '',
-          pronounce:
-            modelFields.find((f) => f.toLowerCase().includes('pronounce')) ||
-            modelFields[1] ||
-            modelFields[0] ||
-            '',
-          definition:
-            modelFields.find(
-              (f) => f.toLowerCase().includes('definition') || f.toLowerCase().includes('meaning')
-            ) ||
-            modelFields[2] ||
-            modelFields[1] ||
-            modelFields[0] ||
-            '',
-        };
+      let j = 0;
+      for (let i = 0; i < fieldMapping.length; i++) {
+        if (i < savedMapping.length && modelFields.includes(savedMapping[i])) {
+          // A valid saved mapping exists for this field
+          fieldMapping[i] = savedMapping[i];
+        } else {
+          // Determine a new mapping for this field
+          if (j < modelFields.length) {
+            fieldMapping[i] = modelFields[j++];
+          } else {
+            fieldMapping[i] = modelFields[j - 1] || '';
+          }
+        }
       }
 
-      await savePreferences();
-    } catch (error) {
+      await updateUserPreferences();
+    } catch {
       // There's a connection error when attempting to connect to Anki
       // Display connection error message
       hasConnectionError = true;
@@ -155,31 +107,35 @@
 
     try {
       isProcessing = true;
-      const client = getAnkiClient();
+      const client = await getAnkiClient();
       const fields: { [key: string]: string } = {};
       const fieldContents: { [key: string]: string[] } = {};
+      const mappings = userPreferences.fieldMappings[userPreferences.selectedModel];
 
-      // First, collect all content for each Anki field
-      Object.entries(fieldMappings).forEach(([dataField, ankiField]) => {
-        if (ankiField && wordData[dataField as keyof WordData]) {
-          if (!fieldContents[ankiField]) {
-            fieldContents[ankiField] = [];
-          }
-          fieldContents[ankiField].push(wordData[dataField as keyof WordData] || '');
+      if (!mappings || mappings.length !== yahooFields.length) {
+        return;
+      }
+
+      for (let i = 0; i < mappings.length; i++) {
+        const sourceField = yahooFields[i];
+        const targetField = mappings[i];
+        if (!fieldContents[targetField]) {
+          fieldContents[targetField] = [];
         }
-      });
+        fieldContents[targetField].push(wordData[sourceField as YahooDataField] || '');
+      }
 
       // Then combine contents with <br/> for fields that have multiple mappings
-      Object.entries(fieldContents).forEach(([ankiField, contents]) => {
-        fields[ankiField] = contents.join('<br/>');
+      Object.entries(fieldContents).forEach(([targetField, contents]) => {
+        fields[targetField] = contents.join('<br/>');
       });
 
       await client.addNote({
-        deckName: selectedDeck,
-        modelName: selectedModel,
+        deckName: userPreferences.selectedDeck,
+        modelName: userPreferences.selectedModel,
         fields,
         options: {
-          allowDuplicate,
+          allowDuplicate: userPreferences.allowDuplicate,
         },
         tags: ['yahoo2anki'],
       });
@@ -189,7 +145,7 @@
       closeAfterDelay();
     } catch (error) {
       if (error instanceof Error) {
-        statusMessage = `Failed to add note: ${error.message}`;
+        statusMessage = `Failed to add note: ${error.message} ${error.name} ${error.stack}`;
       } else {
         statusMessage = 'Failed to communicate with AnkiConnect. Is it running?';
       }
@@ -213,40 +169,40 @@
     <AnkiSettings
       {decks}
       {models}
-      bind:selectedDeck
-      bind:selectedModel
+      bind:selectedDeck={userPreferences.selectedDeck}
+      bind:selectedModel={userPreferences.selectedModel}
       disabled={isProcessing}
-      onDeckChange={savePreferences}
-      onModelChange={updateModelFields}
+      onDeckChange={updateUserPreferences}
+      onModelChange={mapFields}
     />
 
     <div class="group">
       <div class="group-title">Word Data</div>
       <WordDataField
         label="Word or Phrase"
-        value={wordData?.word ?? ''}
+        value={wordData.word}
         {modelFields}
-        bind:selectedField={fieldMappings.word}
+        bind:selectedField={fieldMapping[0]}
         disabled={isProcessing}
-        on:change={savePreferences}
+        on:change={updateUserPreferences}
       />
 
       <WordDataField
         label="Pronounce"
         value={wordData?.pronounce ?? ''}
         {modelFields}
-        bind:selectedField={fieldMappings.pronounce}
+        bind:selectedField={fieldMapping[1]}
         disabled={isProcessing}
-        on:change={savePreferences}
+        on:change={updateUserPreferences}
       />
 
       <WordDataField
         label="Definition"
         value={wordData?.definition ?? ''}
         {modelFields}
-        bind:selectedField={fieldMappings.definition}
+        bind:selectedField={fieldMapping[2]}
         disabled={isProcessing}
-        on:change={savePreferences}
+        on:change={updateUserPreferences}
       />
     </div>
 
@@ -255,10 +211,11 @@
         on:click={addToAnki}
         disabled={!wordData?.word ||
           !wordData?.definition ||
-          !selectedDeck ||
-          !selectedModel ||
-          !fieldMappings.word ||
-          !fieldMappings.definition ||
+          !userPreferences.selectedDeck ||
+          !userPreferences.selectedModel ||
+          !fieldMapping[0] ||
+          !fieldMapping[1] ||
+          !fieldMapping[2] ||
           isProcessing ||
           status === 'success'}
       >
@@ -268,16 +225,12 @@
           Add to Anki
         {/if}
       </Button>
-      <div class="checkbox-container">
-        <input
-          type="checkbox"
-          id="allowDuplicate"
-          bind:checked={allowDuplicate}
-          on:change={savePreferences}
-          disabled={isProcessing}
-        />
-        <label for="allowDuplicate" class:disabled={isProcessing}>Allow duplicate</label>
-      </div>
+      <Checkbox
+        label="Allow duplicate"
+        bind:checked={userPreferences.allowDuplicate}
+        disabled={isProcessing}
+        on:change={updateUserPreferences}
+      />
     </div>
 
     <StatusMessage message={statusMessage} type={status} />
@@ -311,26 +264,5 @@
     display: flex;
     align-items: center;
     gap: 12px;
-  }
-  .checkbox-container {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #666;
-    font-size: 14px;
-  }
-  input[type='checkbox'] {
-    margin: 0;
-    cursor: pointer;
-  }
-  input[type='checkbox']:disabled {
-    cursor: not-allowed;
-  }
-  label {
-    cursor: pointer;
-  }
-  label.disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
   }
 </style>

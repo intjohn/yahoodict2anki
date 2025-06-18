@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "build": "node build.js",
-    "watch": "node build.js --watch",
     "dev": "node build.js --watch",
-    "lint": "eslint . --ext .js,.ts",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint:fix": "eslint . --ext .js,.ts --fix",
-    "prettier": "prettier --write \"**/*.{js,ts,json,html,css}\"",
+    "prettier": "prettier --write \"**/*.{js,ts,json,html,css,svelte}\"",
     "prettier:check": "prettier --check \"**/*.{js,ts,json,html,css}\"",
     "clean": "rm -rf dist dist.zip",
     "prebuild": "pnpm clean",
@@ -27,8 +29,10 @@
   "packageManager": "pnpm@10.11.0",
   "devDependencies": {
     "@eslint/js": "9.27.0",
+    "@sveltejs/vite-plugin-svelte": "^5.1.0",
     "@tsconfig/svelte": "^5.0.4",
     "@types/chrome": "0.0.324",
+    "@types/node": "^24.0.1",
     "@typescript-eslint/eslint-plugin": "8.33.0",
     "@typescript-eslint/parser": "8.33.0",
     "copyfiles": "2.4.1",
@@ -36,11 +40,18 @@
     "esbuild-svelte": "^0.9.3",
     "eslint": "9.27.0",
     "eslint-config-prettier": "10.1.5",
+    "eslint-plugin-svelte": "^3.9.2",
     "globals": "16.2.0",
+    "jsdom": "^26.1.0",
     "prettier": "3.5.3",
     "prettier-plugin-svelte": "^3.4.0",
     "svelte": "5.0.0-next.272",
     "svelte-preprocess": "^6.0.3",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.3"
+  },
+  "dependencies": {
+    "zod": "^3.25.64"
   }
 }

@@ -1,12 +1,11 @@
 <script lang="ts">
-  import type { WordData } from '../types';
-  import { SidePanelMessage } from '../types';
+  import type { WordData } from '../wordData';
+  import { SidePanelMessage } from '../extension';
   import AnkiNoteCreator from './AnkiNoteCreator.svelte';
   import UnsupportedMessage from './UnsupportedMessage.svelte';
   import LoadingSpinner from './LoadingSpinner.svelte';
 
   let wordData: WordData | undefined;
-  let isSupported = false;
   let isLoading = true;
 
   // Request initial data when side panel opens
@@ -24,11 +23,10 @@
               // This might happen when side panel open for a restricted tab,
               // e.g. chrome://extensions
               // where content script is not allowed to run
-              isSupported = false;
+              wordData = undefined;
               isLoading = false;
             } else {
               wordData = data;
-              isSupported = !!(data && (data.word || data.definition));
               isLoading = false;
             }
           }
@@ -64,7 +62,7 @@
 <div class="container">
   {#if isLoading}
     <LoadingSpinner />
-  {:else if isSupported}
+  {:else if wordData}
     <AnkiNoteCreator {wordData} />
   {:else}
     <UnsupportedMessage />

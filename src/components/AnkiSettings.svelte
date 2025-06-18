@@ -4,8 +4,8 @@
   export let selectedDeck: string;
   export let selectedModel: string;
   export let disabled = false;
-  export let onDeckChange: (event: Event) => void;
-  export let onModelChange: (event: Event) => void;
+  export let onDeckChange: () => void;
+  export let onModelChange: () => void;
 </script>
 
 <div class="group">
@@ -13,7 +13,7 @@
   <div class="select-container">
     <div class="field-label">Deck</div>
     <select bind:value={selectedDeck} on:change={onDeckChange} {disabled}>
-      {#each decks as deck}
+      {#each decks as deck (deck)}
         <option value={deck}>{deck}</option>
       {/each}
     </select>
@@ -22,7 +22,7 @@
   <div class="select-container">
     <div class="field-label">Note Type</div>
     <select bind:value={selectedModel} on:change={onModelChange} {disabled}>
-      {#each models as model}
+      {#each models as model (model)}
         <option value={model}>{model}</option>
       {/each}
     </select>
