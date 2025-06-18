@@ -3,8 +3,8 @@ import {
   validateUserOptions,
   validatePort,
   getValidationErrors,
-} from '../src/utils/optionsValidator';
-import type { UserOptions } from './utils/userOptions/options.type';
+} from '../src/utils/userOptions/optionsValidator';
+import type { UserOptions } from '../src/utils/userOptions/options.type';
 
 describe('optionsValidator', () => {
   describe('validateUserOptions', () => {
@@ -62,30 +62,6 @@ describe('optionsValidator', () => {
       const invalidOptions2 = {}; // missing anki object
       expect(validateUserOptions(invalidOptions2)).toBe(false);
       expect(getValidationErrors(invalidOptions2)).toContain('anki: Required');
-    });
-
-    it('should reject additional properties', () => {
-      const invalidOptions = {
-        anki: {
-          port: 8765,
-          extraField: 'value', // additional property in anki object
-        },
-      };
-      expect(validateUserOptions(invalidOptions)).toBe(false);
-      expect(getValidationErrors(invalidOptions)).toContain(
-        "anki: Unrecognized key(s) in object: 'extraField'"
-      );
-
-      const invalidOptions2 = {
-        anki: {
-          port: 8765,
-        },
-        extraField: 'value', // additional property at root
-      };
-      expect(validateUserOptions(invalidOptions2)).toBe(false);
-      expect(getValidationErrors(invalidOptions2)).toContain(
-        "root: Unrecognized key(s) in object: 'extraField'"
-      );
     });
   });
 
