@@ -1,7 +1,7 @@
 <script lang="ts">
   import { yahooFields, type WordData, type YahooDataField } from '../wordData';
   import type { UserPreferences } from '../types/preferences';
-  import Button from '../components/Button.svelte';
+  import Button from '../components/Button/Button.svelte';
   import StatusMessage from '../components/StatusMessage.svelte';
   import AnkiSettings from '../components/AnkiSettings.svelte';
   import WordDataField from '../components/WordDataField.svelte';
@@ -12,11 +12,18 @@
   import { AnkiConnectionError } from '../utils/ankiClient';
   import { DEFAULT_PREFERENCES } from '../types/preferences';
   import { loadUserPreferences, saveUserPreferences } from '../utils/userPreferences';
+  import TagPicker from '../components/TagPicker/TagPicker.svelte';
+  import { loadUserOptions } from '../utils/userOptions';
 
   let { wordData }: { wordData: WordData } = $props();
 
   let decks: string[] = $state([]);
   let models: string[] = $state([]);
+  let pickedTags: string[] = $state.raw([]);
+  let suggestedTags: string[] = $state.raw([]);
+  let tagInputValue = $state('');
+  let additionalTags: string[] = [];
+
   let modelFields: string[] = $state([]);
   let userPreferences: UserPreferences = $state(DEFAULT_PREFERENCES);
   let statusMessage = $state('');
@@ -26,14 +33,14 @@
   let ankiClientPort = $state('');
   let fieldMapping: string[] = $state(Array(yahooFields.length).fill(''));
 
-  // Clear status message after a delay
+  let remainingTags: string[] = [];
+
   function closeAfterDelay() {
     setTimeout(() => {
       window.close();
     }, 1200);
   }
 
-  // Update user preferences
   async function updateUserPreferences() {
     if (userPreferences.selectedModel) {
       userPreferences.fieldMappings[userPreferences.selectedModel] = [...fieldMapping];
@@ -41,17 +48,18 @@
     }
   }
 
-  // Initialize AnkiClient and fetch decks and models when component mounts
-  async function fetchDecksAndModels() {
+  async function init() {
     try {
       userPreferences = await loadUserPreferences();
+      pickedTags = (await loadUserOptions()).anki.defaultTags;
+
       const client = await getAnkiClient();
 
-      // Fetch decks and models
       decks = await client.getDeckNames();
       models = await client.getModelNames();
+      remainingTags = await client.getTags();
+      suggestedTags = remainingTags;
 
-      // If saved deck/model doesn't exist anymore, use first available
       if (!decks.includes(userPreferences.selectedDeck)) {
         userPreferences.selectedDeck = decks[0] || '';
       }
@@ -69,7 +77,6 @@
     }
   }
 
-  // Update model fields when model selection changes
   async function mapFields() {
     try {
       const client = await getAnkiClient();
@@ -137,7 +144,7 @@
         options: {
           allowDuplicate: userPreferences.allowDuplicate,
         },
-        tags: ['yahoo2anki'],
+        tags: pickedTags,
       });
       statusMessage = 'Card added successfully!';
       status = 'success';
@@ -145,7 +152,7 @@
       closeAfterDelay();
     } catch (error) {
       if (error instanceof Error) {
-        statusMessage = `Failed to add note: ${error.message} ${error.name} ${error.stack}`;
+        statusMessage = `Failed to add note: ${error.message}`;
       } else {
         statusMessage = 'Failed to communicate with AnkiConnect. Is it running?';
       }
@@ -158,8 +165,34 @@
     chrome.runtime.openOptionsPage();
   }
 
-  // Fetch decks and models when component mounts
-  fetchDecksAndModels();
+  function handleTagPick(tag: string) {
+    pickedTags = [...pickedTags, tag].sort();
+    const newRemainingTags = remainingTags.filter((t) => t !== tag);
+    if (newRemainingTags.length === remainingTags.length) {
+      additionalTags.push(tag);
+    }
+    remainingTags = newRemainingTags;
+    suggestedTags = remainingTags;
+    tagInputValue = '';
+  }
+
+  function handleTagInput() {
+    const trimmedValue = tagInputValue.trim().toLowerCase();
+    suggestedTags = remainingTags.filter((t) => t.toLowerCase().includes(trimmedValue));
+  }
+
+  function handleTagRemove(tag: string) {
+    pickedTags = pickedTags.filter((t) => t !== tag);
+    const newAdditionalTags = additionalTags.filter((t) => t !== tag);
+    if (newAdditionalTags.length === additionalTags.length) {
+      remainingTags = [...remainingTags, tag].sort();
+    } else {
+      additionalTags = newAdditionalTags;
+    }
+    suggestedTags = remainingTags;
+  }
+
+  init();
 </script>
 
 <div class="word-card">
@@ -205,6 +238,16 @@
         on:change={updateUserPreferences}
       />
     </div>
+
+    <TagPicker
+      bind:inputValue={tagInputValue}
+      suggestions={suggestedTags}
+      {pickedTags}
+      disabled={isProcessing}
+      onPick={handleTagPick}
+      onInput={handleTagInput}
+      onRemove={handleTagRemove}
+    />
 
     <div class="button-container">
       <Button

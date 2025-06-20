@@ -1,6 +1,6 @@
 {
   "name": "yahoo_to_anki",
-  "version": "0.0.1.0",
+  "version": "0.0.1.002",
   "description": "Chrome extension to create Anki flashcards from Yahoo dictionary search results",
   "type": "module",
   "scripts": {
@@ -16,7 +16,9 @@
     "clean": "rm -rf dist dist.zip",
     "prebuild": "pnpm clean",
     "postbuild": "copyfiles manifest.json \"images/**/*\" dist/ && copyfiles -f src/sidepanel/sidepanel.html dist/sidepanel/",
-    "package": "cd dist && zip -r ../dist.zip ."
+    "package": "cd dist && zip -r ../dist.zip .",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "keywords": [
     "chrome-extension",
@@ -29,7 +31,13 @@
   "packageManager": "pnpm@10.11.0",
   "devDependencies": {
     "@eslint/js": "9.27.0",
+    "@storybook/addon-svelte-csf": "^5.0.3",
+    "@storybook/builder-vite": "^9.0.11",
+    "@storybook/svelte": "^9.0.11",
+    "@storybook/svelte-vite": "^9.0.11",
     "@sveltejs/vite-plugin-svelte": "^5.1.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/svelte": "^5.2.8",
     "@tsconfig/svelte": "^5.0.4",
     "@types/chrome": "0.0.324",
     "@types/node": "^24.0.1",
@@ -40,11 +48,13 @@
     "esbuild-svelte": "^0.9.3",
     "eslint": "9.27.0",
     "eslint-config-prettier": "10.1.5",
+    "eslint-plugin-storybook": "^9.0.11",
     "eslint-plugin-svelte": "^3.9.2",
     "globals": "16.2.0",
     "jsdom": "^26.1.0",
     "prettier": "3.5.3",
     "prettier-plugin-svelte": "^3.4.0",
+    "storybook": "^9.0.11",
     "svelte": "5.0.0-next.272",
     "svelte-preprocess": "^6.0.3",
     "typescript": "5.8.3",

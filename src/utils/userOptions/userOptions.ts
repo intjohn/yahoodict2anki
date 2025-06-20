@@ -1,6 +1,6 @@
 import type { UserOptions } from './options.type';
 import { validateUserOptions, getValidationErrors, validatePort } from './optionsValidator';
-import { DEFAULT_ANKI_PORT } from './options.type';
+import { DEFAULT_OPTIONS } from './options.type';
 
 const STORAGE_KEY = 'userOptions';
 
@@ -17,13 +17,8 @@ export const loadUserOptions = async (): Promise<UserOptions> => {
     if (options) {
       console.error('Invalid options, errors:', getValidationErrors(options));
     }
-    const defaultOptions: UserOptions = {
-      anki: {
-        port: DEFAULT_ANKI_PORT,
-      },
-    };
-    await saveUserOptions(defaultOptions);
-    return defaultOptions;
+    await saveUserOptions(DEFAULT_OPTIONS);
+    return DEFAULT_OPTIONS;
   }
   return options;
 };

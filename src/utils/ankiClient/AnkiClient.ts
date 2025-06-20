@@ -79,4 +79,12 @@ export class AnkiClient {
     const result = await this.invoke<number>('addNote', { note });
     return result;
   }
+
+  /**
+   * Get tags
+   */
+  async getTags(): Promise<string[]> {
+    const result = await this.invoke<string[]>('getTags');
+    return result || [];
+  }
 }

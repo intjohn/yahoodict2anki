@@ -90,11 +90,7 @@
 
 <style>
   .container {
-    font-family:
-      system-ui,
-      -apple-system,
-      sans-serif;
-    padding: 20px;
+    padding: var(--spacing-lg);
     margin: 0;
   }
 </style>

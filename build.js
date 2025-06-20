@@ -11,12 +11,15 @@ async function build() {
   await mkdir('dist/content_scripts', { recursive: true });
   await mkdir('dist/images', { recursive: true });
   await mkdir('dist/options', { recursive: true });
+  await mkdir('dist/styles', { recursive: true });
 
   // Copy static files
   await copyFile('manifest.json', 'dist/manifest.json');
   await copyFile('src/sidepanel/sidepanel.html', 'dist/sidepanel/sidepanel.html');
   await copyFile('src/options/options.html', 'dist/options/options.html');
   await copyFile('images/icon.png', 'dist/images/icon.png');
+  await copyFile('src/styles/main.css', 'dist/styles/main.css');
+  await copyFile('src/styles/theme.css', 'dist/styles/theme.css');
 
   // Common build options
   const buildOptions = {
@@ -25,6 +28,9 @@ async function build() {
     platform: 'browser',
     target: 'es2022',
     sourcemap: true,
+    loader: {
+      '.png': 'dataurl',
+    },
   };
 
   // Svelte plugin configuration

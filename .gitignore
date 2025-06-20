@@ -23,3 +23,5 @@ pnpm-debug.log*
 .env
 .env.local
 .env.*.local 
+*storybook.log
+storybook-static

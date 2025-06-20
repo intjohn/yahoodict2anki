@@ -1,4 +1,4 @@
-import { userOptionsSchema, portSchema } from './options.type';
+import { userOptionsSchema, portSchema, tagsSchema } from './options.type';
 import type { UserOptions } from './options.type';
 
 export function validateUserOptions(options: unknown): options is UserOptions {
@@ -8,6 +8,11 @@ export function validateUserOptions(options: unknown): options is UserOptions {
 
 export function validatePort(port: unknown): boolean {
   const result = portSchema.safeParse(port);
+  return result.success;
+}
+
+export function validateTags(tags: unknown): boolean {
+  const result = tagsSchema.safeParse(tags);
   return result.success;
 }
 

@@ -117,7 +117,7 @@ export class SidePanel {
   private static handleSidePanelConnection(port: chrome.runtime.Port): void {
     if (port.name === WorkerMessage.SidePanelAlive) {
       SidePanel.status = 'open';
-      
+
       port.onDisconnect.addListener(() => {
         SidePanel.status = 'closed';
         SidePanel.currentHost = null;

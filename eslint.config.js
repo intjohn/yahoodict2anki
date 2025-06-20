@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from 'eslint-plugin-storybook';
+
 import eslint from '@eslint/js';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
@@ -9,8 +12,7 @@ export default [
   {
     ignores: ['dist/**/*'],
   },
-  eslint.configs.recommended,
-  // JavaScript specific configuration
+  eslint.configs.recommended, // JavaScript specific configuration
   {
     files: ['**/*.js'],
     languageOptions: {
@@ -31,8 +33,7 @@ export default [
       ],
       'no-console': 'off',
     },
-  },
-  // TypeScript specific configuration
+  }, // TypeScript specific configuration
   {
     files: ['**/*.ts'],
     plugins: {
@@ -64,8 +65,7 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
-  prettier,
-  // Svelte specific configuration
+  prettier, // Svelte specific configuration
   ...sveltePlugin.configs.recommended,
   {
     files: ['**/*.svelte'],
@@ -81,4 +81,5 @@ export default [
       },
     },
   },
+  ...storybook.configs['flat/recommended'],
 ];

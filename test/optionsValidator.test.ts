@@ -12,6 +12,7 @@ describe('optionsValidator', () => {
       const validOptions: UserOptions = {
         anki: {
           port: 8765,
+          defaultTags: ['yahoo2anki'],
         },
       };
       expect(validateUserOptions(validOptions)).toBe(true);
@@ -22,6 +23,7 @@ describe('optionsValidator', () => {
       const invalidOptions = {
         anki: {
           port: 0, // below minimum
+          defaultTags: ['yahoo2anki'],
         },
       };
       expect(validateUserOptions(invalidOptions)).toBe(false);
@@ -32,6 +34,7 @@ describe('optionsValidator', () => {
       const invalidOptions2 = {
         anki: {
           port: 65536, // above maximum
+          defaultTags: ['yahoo2anki'],
         },
       };
       expect(validateUserOptions(invalidOptions2)).toBe(false);
@@ -44,6 +47,7 @@ describe('optionsValidator', () => {
       const invalidOptions = {
         anki: {
           port: '8765', // string instead of number
+          defaultTags: ['yahoo2anki'],
         },
       };
       expect(validateUserOptions(invalidOptions)).toBe(false);
@@ -55,6 +59,7 @@ describe('optionsValidator', () => {
     it('should reject missing required fields', () => {
       const invalidOptions = {
         anki: {}, // missing port
+        defaultTags: ['yahoo2anki'],
       };
       expect(validateUserOptions(invalidOptions)).toBe(false);
       expect(getValidationErrors(invalidOptions)).toContain('anki.port: Required');
