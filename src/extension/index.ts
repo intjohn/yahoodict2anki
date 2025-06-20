@@ -4,3 +4,4 @@ export {
   type SidePanelStatus,
   type SidePanelMessageType,
 } from './sidePanel.type';
+export { WorkerMessage, type WorkerMessageType } from './worker.type';

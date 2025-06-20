@@ -4,9 +4,13 @@
   import AnkiNoteCreator from './AnkiNoteCreator.svelte';
   import UnsupportedMessage from './UnsupportedMessage.svelte';
   import LoadingSpinner from './LoadingSpinner.svelte';
+  import { WorkerMessage } from '../extension/worker.type';
 
   let wordData: WordData | undefined;
   let isLoading = true;
+
+  let reportAliveTimer: ReturnType<typeof setInterval> | undefined;
+  let workerConnection: chrome.runtime.Port | undefined;
 
   // Request initial data when side panel opens
   function fetchWordData(): void {
@@ -37,6 +41,20 @@
     });
   }
 
+  function setupLivenessTalk(): void {
+    workerConnection = chrome.runtime.connect({ name: WorkerMessage.SidePanelAlive });
+
+    reportAliveTimer = setInterval(() => {
+      workerConnection?.postMessage('I am still here, so stay awake, alright?');
+    }, 15000);
+  }
+
+  function cleanupLivenessTalk(): void {
+    clearInterval(reportAliveTimer);
+    workerConnection?.disconnect();
+    workerConnection = undefined;
+  }
+
   // Handle messages from background script
   chrome.runtime.onMessage.addListener((message: SidePanelMessage) => {
     switch (message) {
@@ -47,13 +65,14 @@
         fetchWordData();
         break;
       case SidePanelMessage.CloseSidePanel:
+        cleanupLivenessTalk();
         window.close();
         break;
     }
   });
 
-  // Create liveness connection
-  chrome.runtime.connect({ name: SidePanelMessage.SidePanelAlive });
+  // Create session to report liveness
+  setupLivenessTalk();
 
   // Initial fetch
   fetchWordData();

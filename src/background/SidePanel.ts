@@ -1,10 +1,9 @@
-import { SidePanelMessage } from '../extension';
+import { SidePanelMessage, WorkerMessage } from '../extension';
 
 type SidePanelStatus = 'open' | 'closed' | 'pending';
 
 export class SidePanel {
   private static status: SidePanelStatus = 'closed';
-  private static sidePanelListening: boolean = false;
   private static currentHost: string | null;
 
   /**
@@ -106,11 +105,9 @@ export class SidePanel {
    * Sets up the liveness connection to track side panel state
    */
   private static setupLivenessConnection(): void {
-    if (SidePanel.sidePanelListening) {
-      return;
+    if (!chrome.runtime.onConnect.hasListener(SidePanel.handleSidePanelConnection)) {
+      chrome.runtime.onConnect.addListener(SidePanel.handleSidePanelConnection);
     }
-    SidePanel.sidePanelListening = true;
-    chrome.runtime.onConnect.addListener(SidePanel.handleSidePanelConnection);
   }
 
   /**
@@ -118,8 +115,9 @@ export class SidePanel {
    * @param port - An object containing info about the incoming connection
    */
   private static handleSidePanelConnection(port: chrome.runtime.Port): void {
-    if (port.name === SidePanelMessage.SidePanelAlive) {
+    if (port.name === WorkerMessage.SidePanelAlive) {
       SidePanel.status = 'open';
+      
       port.onDisconnect.addListener(() => {
         SidePanel.status = 'closed';
         SidePanel.currentHost = null;
