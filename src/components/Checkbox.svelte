@@ -1,11 +1,9 @@
 <script lang="ts">
-  export let label: string;
-  export let checked: boolean;
-  export let disabled: boolean;
+  let { label, checked = $bindable(false), disabled, ...rest } = $props();
 </script>
 
 <div class="checkbox-container">
-  <input type="checkbox" id="allowDuplicate" bind:checked {disabled} on:change />
+  <input type="checkbox" id="allowDuplicate" bind:checked {disabled} {...rest} />
   <label for="allowDuplicate" class:disabled>{label}</label>
 </div>
 

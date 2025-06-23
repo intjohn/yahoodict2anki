@@ -2,21 +2,21 @@
 </script>
 
 <div class="unsupported-message">
-  <h2>Unsupported Page</h2>
-  <p>Please navigate to a Yahoo Dictionary search result page to use this extension.</p>
+  <h2>不支援的網頁</h2>
+  <p>請瀏覽 Yahoo 字典的搜尋結果頁面以使用此擴充套件。</p>
 </div>
 
 <style>
   .unsupported-message {
-    padding: 40px 20px;
-    color: #666;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    color: var(--color-text-secondary);
   }
   h2 {
     margin: 0 0 10px;
-    font-size: 18px;
+    font-size: var(--font-size-lg);
   }
   p {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--font-size-sm);
   }
 </style>

@@ -1,8 +1,8 @@
 <script lang="ts">
-  let { children } = $props();
+  let { children, class: className = '' } = $props();
 </script>
 
-<div class="form-group">{@render children()}</div>
+<div class="form-group {className}">{@render children()}</div>
 
 <style>
   .form-group {

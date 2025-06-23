@@ -28,30 +28,29 @@
   }
 
   .input {
-    color: #333;
-    font-size: 0.875rem;
+    color: var(--color-text-content);
+    font-size: var(--font-size-sm);
     width: 15rem;
     padding: 0.5rem;
-    border: 1px solid #aaa;
-    border-radius: 0.25rem;
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-sm);
     outline: none;
     transition: border-color 0.2s;
-    margin-bottom: 0.5rem;
   }
 
   .input:focus {
-    border-color: #007bff;
+    border-color: var(--color-border-focus);
   }
 
   .input:disabled {
-    background-color: #f5f5f5;
-    border-color: #ccc;
-    color: #8e9398;
+    background-color: var(--color-disabled-bg);
+    border-color: var(--color-border-primary);
+    color: var(--color-text-muted);
     cursor: not-allowed;
   }
 
   .input:has(+ .error) {
-    border-color: red;
+    border-color: var(--color-error);
   }
 
   .input::placeholder {

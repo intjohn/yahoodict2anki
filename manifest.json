@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Yahoo Dictionary to Anki Note BETA",
-  "version": "0.0.1.002",
+  "version": "0.0.1.003",
   "description": "THIS EXTENSION IS FOR BETA TESTING. Create an Anki flashcard from Yahoo dictionary search results.",
   "icons": {
     "16": "images/icon.png",

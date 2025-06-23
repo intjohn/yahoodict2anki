@@ -15,6 +15,8 @@
     onPick = () => {},
     onInput = () => {},
     onRemove = () => {},
+    class: className = '',
+    labelClass = '',
   } = $props();
 
   let highlightedTag = $state('');
@@ -42,13 +44,11 @@
   }
 </script>
 
-{#snippet tagPicker()}
-  <div class="tag-picker">
+{#snippet tagPicker(tagPickerClass = '')}
+  <div class="tag-picker {tagPickerClass}">
     <div class="tags-container">
       {#if !pickedTags.length}
-        <div class="no-tags-message">
-          No tags picked yet. Use the input field to search and add tags
-        </div>
+        <div class="no-tags-message">尚未選擇標籤。請使用輸入欄位查詢或新增標籤。</div>
       {/if}
       {#each pickedTags as tag (tag)}
         <div class="tag-wrapper" class:highlighted={tag === highlightedTag}>
@@ -63,18 +63,18 @@
       {disabled}
       onEnter={handlePick}
       {onInput}
-      placeholder="Type to add tags..."
+      placeholder="輸入文字以查詢或新增標籤"
     />
   </div>
 {/snippet}
 
 {#if label}
-  <FormGroup>
-    <FormLabel forId={id} {label} />
+  <FormGroup class={className}>
+    <FormLabel forId={id} {label} class={labelClass} />
     {@render tagPicker()}
   </FormGroup>
 {:else}
-  {@render tagPicker()}
+  {@render tagPicker(className)}
 {/if}
 
 <style>

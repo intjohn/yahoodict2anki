@@ -13,3 +13,5 @@
 </script>
 
 <Story name="Default">Click me</Story>
+
+<Story name="Disabled" args={{ disabled: true }}>I am disabled</Story>

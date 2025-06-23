@@ -1,7 +1,6 @@
 # Yahoo Dictionary to Anki
 
-This Chrome extension helps add a word/phrase looked up in Yahoo dictionary (https://tw.dictionary.search.yahoo.com/) into an
-Anki note stored in local. Cards is generated automatically based on the selected note type.
+This Chrome extension helps add a word/phrase looked up in Yahoo dictionary (https://tw.dictionary.search.yahoo.com/) as a new note into Anki that runs in user's local environment through connection provided by Anki's add-on AnkiConnect.
 
 ## Prerequisite
 
@@ -9,8 +8,6 @@ Installation of [Anki desktop](https://apps.ankiweb.net/)(Windows/MacOS) as well
 
 ## Configuration
 
-TBD
+- `AnkiConnection port` on which port AnkiConnection is listening
+- `Default tags` Anki's note can contain 0 to multiple tags for search convenience. This extension allows to add tags to the note to be added. Default tags are applied in default to spare user's time.
 
-## Technique Details
-
-TBD

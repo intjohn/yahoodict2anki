@@ -2,7 +2,7 @@
   let {
     children,
     type = 'button' as 'button' | 'submit' | 'reset',
-    className = '',
+    class: className = '',
     ...rest
   } = $props();
 </script>

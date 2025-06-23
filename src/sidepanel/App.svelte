@@ -45,7 +45,12 @@
     workerConnection = chrome.runtime.connect({ name: WorkerMessage.SidePanelAlive });
 
     reportAliveTimer = setInterval(() => {
-      workerConnection?.postMessage('I am still here, so stay awake, alright?');
+      try {
+        workerConnection?.postMessage('I am still here, so stay awake, alright?');
+      } catch {
+        // The connection is closed on background script side, might by system shutdown/sleep
+        window.close();
+      }
     }, 15000);
   }
 

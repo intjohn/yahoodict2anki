@@ -1,57 +1,67 @@
 <script lang="ts">
-  export let label: string;
-  export let value: string = '';
-  export let modelFields: string[] = [];
-  export let selectedField: string = '';
-  export let disabled = false;
+  import { randomUUID } from '../utils/random';
+  import FormLabel from './Form/FormLabel.svelte';
+  import Options from './Form/Options.svelte';
+
+  let {
+    id = randomUUID(),
+    label = '',
+    modelFields = [],
+    selectedField = $bindable(''),
+    disabled = false,
+    onchange = () => {},
+    class: className = '',
+    children,
+  } = $props();
 </script>
 
-<div class="field">
-  <div class="field-label">{label}</div>
-  <div class="field-content">{value}</div>
-  <div class="field-mapping">
-    <select bind:value={selectedField} on:change {disabled}>
-      <option value="">-- Map to field --</option>
-      {#each modelFields as field (field)}
-        <option value={field}>{field}</option>
-      {/each}
-    </select>
+<div class="word-data-field {className}">
+  {#if label}
+    <FormLabel forId={id} {label} class="word-data-field__label" />
+  {/if}
+  <div class="word-data-field__value">{@render children()}</div>
+  <div class="word-data-field__mappings">
+    <Options
+      label="對應到筆記欄位"
+      options={modelFields}
+      bind:selected={selectedField}
+      {disabled}
+      {onchange}
+      labelClass="word-data-field__mappings-label"
+    />
   </div>
 </div>
 
 <style>
-  .field {
-    margin-bottom: 15px;
+  .word-data-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding-left: var(--spacing-md);
   }
-  .field:last-child {
-    margin-bottom: 0;
+
+  .word-data-field > :global(.word-data-field__label) {
+    margin-left: calc(-1 * var(--spacing-md));
   }
-  .field-label {
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 5px;
-  }
-  .field-content {
-    color: #666;
+
+  .word-data-field__value {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
     line-height: 1.5;
-    margin-bottom: 8px;
-    background: #f8f9fa;
-    padding: 8px;
-    border-radius: 4px;
+    padding: var(--spacing-sm);
+    background: var(--color-bg-slight-highlight);
+    border: 2px solid var(--color-border-primary);
+    border-radius: var(--radius-sm);
   }
-  .field-mapping {
-    margin-top: 4px;
-    font-size: 14px;
+
+  .word-data-field__mappings {
+    font-size: var(--font-size-sm);
+    padding-left: var(--spacing-lg);
+    border-left: 5px dotted var(--color-bg-secondary);
   }
-  select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.8rem;
-  }
-  select:disabled {
-    background: #f5f5f5;
-    cursor: not-allowed;
+
+  .word-data-field :global(.word-data-field__mappings-label) {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-normal);
   }
 </style>

@@ -3,7 +3,6 @@
   import type { UserPreferences } from '../types/preferences';
   import Button from '../components/Button/Button.svelte';
   import StatusMessage from '../components/StatusMessage.svelte';
-  import AnkiSettings from '../components/AnkiSettings.svelte';
   import WordDataField from '../components/WordDataField.svelte';
   import ConnectionError from './ConnectionErrorMessage.svelte';
   import Checkbox from '../components/Checkbox.svelte';
@@ -14,6 +13,10 @@
   import { loadUserPreferences, saveUserPreferences } from '../utils/userPreferences';
   import TagPicker from '../components/TagPicker/TagPicker.svelte';
   import { loadUserOptions } from '../utils/userOptions';
+  import Options from '../components/Form/Options.svelte';
+  import htmlFormat from 'html-format';
+  import Highlight from 'svelte-highlight';
+  import xml from 'svelte-highlight/languages/xml';
 
   let { wordData }: { wordData: WordData } = $props();
 
@@ -58,6 +61,8 @@
       decks = await client.getDeckNames();
       models = await client.getModelNames();
       remainingTags = await client.getTags();
+      additionalTags = pickedTags.filter((t) => !remainingTags.includes(t));
+      remainingTags = remainingTags.filter((t) => !pickedTags.includes(t));
       suggestedTags = remainingTags;
 
       if (!decks.includes(userPreferences.selectedDeck)) {
@@ -186,60 +191,71 @@
     const newAdditionalTags = additionalTags.filter((t) => t !== tag);
     if (newAdditionalTags.length === additionalTags.length) {
       remainingTags = [...remainingTags, tag].sort();
+      suggestedTags = remainingTags;
     } else {
       additionalTags = newAdditionalTags;
     }
-    suggestedTags = remainingTags;
   }
 
   init();
 </script>
 
-<div class="word-card">
-  {#if hasConnectionError}
-    <ConnectionError on:click={openOptions} port={ankiClientPort} />
-  {:else}
-    <AnkiSettings
-      {decks}
-      {models}
-      bind:selectedDeck={userPreferences.selectedDeck}
-      bind:selectedModel={userPreferences.selectedModel}
+{#if hasConnectionError}
+  <ConnectionError on:click={openOptions} port={ankiClientPort} />
+{:else}
+  <div class="note-creator">
+    <Options
+      label="將筆記新增到牌組"
+      options={decks}
+      bind:selected={userPreferences.selectedDeck}
       disabled={isProcessing}
-      onDeckChange={updateUserPreferences}
-      onModelChange={mapFields}
+      onchange={updateUserPreferences}
     />
+    <Options
+      label="套用筆記類型"
+      options={models}
+      bind:selected={userPreferences.selectedModel}
+      disabled={isProcessing}
+      onchange={mapFields}
+    />
+    <hr />
 
-    <div class="group">
-      <div class="group-title">Word Data</div>
-      <WordDataField
-        label="Word or Phrase"
-        value={wordData.word}
-        {modelFields}
-        bind:selectedField={fieldMapping[0]}
-        disabled={isProcessing}
-        on:change={updateUserPreferences}
-      />
+    <WordDataField
+      label="單字或片語"
+      {modelFields}
+      bind:selectedField={fieldMapping[0]}
+      disabled={isProcessing}
+      onchange={updateUserPreferences}
+    >
+      {wordData?.word ?? ''}
+    </WordDataField>
 
-      <WordDataField
-        label="Pronounce"
-        value={wordData?.pronounce ?? ''}
-        {modelFields}
-        bind:selectedField={fieldMapping[1]}
-        disabled={isProcessing}
-        on:change={updateUserPreferences}
-      />
+    <WordDataField
+      label="發音"
+      {modelFields}
+      bind:selectedField={fieldMapping[1]}
+      disabled={isProcessing}
+      onchange={updateUserPreferences}
+    >
+      {wordData?.pronounce ?? ''}
+    </WordDataField>
 
-      <WordDataField
-        label="Definition"
-        value={wordData?.definition ?? ''}
-        {modelFields}
-        bind:selectedField={fieldMapping[2]}
-        disabled={isProcessing}
-        on:change={updateUserPreferences}
+    <WordDataField
+      label="定義"
+      {modelFields}
+      bind:selectedField={fieldMapping[2]}
+      disabled={isProcessing}
+      onchange={updateUserPreferences}
+    >
+      <Highlight
+        language={xml}
+        code={htmlFormat(wordData?.definition?.trim() ?? '')}
+        class="html-code"
       />
-    </div>
+    </WordDataField>
 
     <TagPicker
+      label="標籤"
       bind:inputValue={tagInputValue}
       suggestions={suggestedTags}
       {pickedTags}
@@ -249,9 +265,11 @@
       onRemove={handleTagRemove}
     />
 
+    <hr />
+
     <div class="button-container">
       <Button
-        on:click={addToAnki}
+        onclick={addToAnki}
         disabled={!wordData?.word ||
           !wordData?.definition ||
           !userPreferences.selectedDeck ||
@@ -263,49 +281,48 @@
           status === 'success'}
       >
         {#if status === 'success'}
-          Done
+          完成
         {:else}
-          Add to Anki
+          新增筆記
         {/if}
       </Button>
       <Checkbox
-        label="Allow duplicate"
+        label="允許重複的筆記"
         bind:checked={userPreferences.allowDuplicate}
         disabled={isProcessing}
-        on:change={updateUserPreferences}
+        onchange={updateUserPreferences}
       />
     </div>
 
     <StatusMessage message={statusMessage} type={status} />
-  {/if}
-</div>
+  </div>
+{/if}
 
 <style>
-  .word-card {
+  .note-creator {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding-right: var(--spacing-sm);
+  }
+  /* .word-card {
     background: #fff;
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
-  }
-  .group {
-    border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 20px;
-  }
-  .group-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #eee;
-  }
+  } */
   .button-container {
-    margin-top: 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--spacing-md);
+  }
+  .note-creator :global(pre) {
+    margin: 0;
+  }
+  .note-creator :global(pre code.hljs) {
+    background: transparent;
+    font-size: var(--font-size-xs);
+    padding: 0;
   }
 </style>

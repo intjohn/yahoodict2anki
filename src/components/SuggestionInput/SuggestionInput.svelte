@@ -57,6 +57,7 @@
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
+        picked = false;
         navigateIndex = Math.min(navigateIndex + 1, suggestions.length - 1);
         selected = false;
         break;

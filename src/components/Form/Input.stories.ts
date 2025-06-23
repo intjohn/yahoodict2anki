@@ -3,7 +3,7 @@ import { action } from 'storybook/actions';
 import Input from './Input.svelte';
 
 const meta = {
-  title: 'Components/Form/Input',
+  title: 'Components/Input',
   component: Input,
   argTypes: {
     type: { control: 'text' },

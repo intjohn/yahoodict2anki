@@ -18,8 +18,6 @@ async function build() {
   await copyFile('src/sidepanel/sidepanel.html', 'dist/sidepanel/sidepanel.html');
   await copyFile('src/options/options.html', 'dist/options/options.html');
   await copyFile('images/icon.png', 'dist/images/icon.png');
-  await copyFile('src/styles/main.css', 'dist/styles/main.css');
-  await copyFile('src/styles/theme.css', 'dist/styles/theme.css');
 
   // Common build options
   const buildOptions = {
@@ -30,7 +28,9 @@ async function build() {
     sourcemap: true,
     loader: {
       '.png': 'dataurl',
+      '.css': 'css',
     },
+    conditions: ['svelte', 'browser', 'import'],
   };
 
   // Svelte plugin configuration
@@ -39,7 +39,7 @@ async function build() {
       dev: process.env.NODE_ENV !== 'production',
       css: 'injected',
     },
-    preprocess: sveltePreprocess(),
+    preprocess: [sveltePreprocess()],
   };
 
   // Check if watch mode is enabled
@@ -71,6 +71,11 @@ async function build() {
       entryPoints: ['src/options/options.ts'],
       outfile: 'dist/options/options.js',
       plugins: [sveltePlugin(svelteOptions)],
+    }),
+    esbuild.context({
+      ...buildOptions,
+      entryPoints: ['src/styles/main.css'],
+      outfile: 'dist/styles/main.css',
     }),
   ]);
 

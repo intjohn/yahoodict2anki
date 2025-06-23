@@ -13,6 +13,8 @@
     errorMessage,
     onInput = () => {},
     onChange = () => {},
+    class: className = '',
+    labelClass = '',
   } = $props();
 
   function handleInput(event: Event) {
@@ -24,9 +26,9 @@
   }
 </script>
 
-{#snippet numberInput()}
+{#snippet numberInput(inputClass = '')}
   <Input
-    class="number-input__input"
+    class="number-input__input {inputClass}"
     type="number"
     {id}
     bind:value
@@ -39,10 +41,10 @@
 {/snippet}
 
 {#if label}
-  <FormGroup>
-    <FormLabel forId={id} {label} />
+  <FormGroup class={className}>
+    <FormLabel forId={id} {label} class={labelClass} />
     {@render numberInput()}
   </FormGroup>
 {:else}
-  {@render numberInput()}
+  {@render numberInput(className)}
 {/if}
