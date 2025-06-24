@@ -1,6 +1,6 @@
 {
   "name": "yahoo_to_anki",
-  "version": "0.0.1.003",
+  "version": "0.0.1.004",
   "description": "Chrome extension to create Anki flashcards from Yahoo dictionary search results",
   "type": "module",
   "scripts": {
