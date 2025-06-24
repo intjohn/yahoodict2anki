@@ -19,7 +19,7 @@
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--font-size-md);
     transition: background var(--transition-normal);
   }
   button:disabled {
