@@ -151,15 +151,15 @@
         },
         tags: pickedTags,
       });
-      statusMessage = 'Card added successfully!';
+      statusMessage = '筆記新增成功！';
       status = 'success';
       isProcessing = false;
       closeAfterDelay();
     } catch (error) {
       if (error instanceof Error) {
-        statusMessage = `Failed to add note: ${error.message}`;
+        statusMessage = `無法新增筆記，發生錯誤：${error.message}`;
       } else {
-        statusMessage = 'Failed to communicate with AnkiConnect. Is it running?';
+        statusMessage = '無法與 AnkiConnect 通訊。請確認 Anki 與 AnkiConnect 是否正在運行。';
       }
       status = 'error';
       isProcessing = false;

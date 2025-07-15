@@ -2,7 +2,7 @@ import type { AnkiNote, AnkiResponse, AnkiRequestParams } from './anki.type';
 
 export class AnkiConnectionError extends Error {
   constructor(url: string) {
-    super(`Failed to connect to Anki on ${url}`);
+    super(`無法連線到 Anki URL: ${url}`);
     this.name = 'AnkiConnectionError';
   }
 }

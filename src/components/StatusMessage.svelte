@@ -1,10 +1,17 @@
 <script lang="ts">
-  export let message = '';
-  export let type: 'success' | 'error' | '' = '';
+  let { message = '', type = 'success' } = $props();
+
+  let messageRef: HTMLElement | null = $state(null);
+
+  $effect(() => {
+    if (messageRef && message) {
+      messageRef.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
 </script>
 
 {#if message}
-  <div class="status-message {type} visible">
+  <div bind:this={messageRef} class="status-message {type} visible">
     {message}
   </div>
 {/if}

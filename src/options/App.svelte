@@ -26,7 +26,7 @@
   const checkPort = () => {
     portErrorMessage = isPortValid(parseInt(port, 10))
       ? ''
-      : 'Please enter a valid port number (1-65535)';
+      : '請輸入有效的連接埠號碼 (1-65535)';
   };
 
   const handleTagPick = (tag: string) => {
@@ -41,14 +41,14 @@
   const submit = async () => {
     try {
       await saveUserOptions({ anki: { port: parseInt(port, 10), defaultTags } });
-      statusMessage = 'Options saved.';
+      statusMessage = '設定已儲存';
       statusType = 'success';
       setTimeout(() => {
         statusMessage = '';
         statusType = '';
       }, 3000);
     } catch (error) {
-      statusMessage = `Failed to save options: ${error}`;
+      statusMessage = `無法儲存設定，發生錯誤：${error}`;
       statusType = 'error';
     }
   };
@@ -83,7 +83,7 @@
         labelClass="form-label"
       />
 
-      <Button class="save-button" onclick={submit}>Save</Button>
+      <Button class="save-button" onclick={submit}>儲存設定</Button>
       <StatusMessage message={statusMessage} type={statusType} />
     </div>
   </div>
@@ -104,6 +104,7 @@
 
   .options-container {
     padding: var(--spacing-xl);
+    padding-left: calc(var(--spacing-xl) * 1.5);
     box-shadow: var(--shadow-layout-left);
   }
 
@@ -127,6 +128,7 @@
   .options-form :global(.save-button) {
     margin-top: var(--spacing-sm);
     align-self: flex-start;
+    font-size: var(--font-size-md);
   }
 
   .options-form :global(.form-group) {

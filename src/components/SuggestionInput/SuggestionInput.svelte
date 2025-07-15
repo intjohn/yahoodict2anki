@@ -35,6 +35,15 @@
     navigateIndex = -1;
     inputElement?.focus();
     selected = true;
+    onInput();
+  }
+
+  function submit() {
+    if (value) {
+      onEnter(value);
+      selected = false;
+      picked = true;
+    }
   }
 
   function handleInputClick() {
@@ -49,6 +58,7 @@
   function handleItemClick(event: MouseEvent) {
     event.preventDefault();
     selectSuggestion();
+    submit();
   }
 
   function handleKeydown(event: KeyboardEvent) {
@@ -69,10 +79,8 @@
         event.preventDefault();
         if (navigateIndex >= 0) {
           selectSuggestion();
-        } else if (value) {
-          onEnter(value);
-          selected = false;
-          picked = true;
+        } else {
+          submit();
         }
         break;
       case 'Escape':
@@ -145,31 +153,6 @@
   .suggestion-input :global(.suggestion-input__input.selected) {
     background-color: #f0faff;
   }
-
-  /* .input {
-    color: #333;
-    width: 15rem;
-    padding: 0.375rem 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .input.selected {
-    background-color: #f0faff;
-  }
-
-  .input:focus {
-    border-color: #007bff;
-  }
-
-  .input:disabled {
-    background-color: #f5f5f5;
-    color: #9aa1a9;
-    cursor: not-allowed;
-  } */
 
   .input-wrapper {
     align-self: flex-start;
