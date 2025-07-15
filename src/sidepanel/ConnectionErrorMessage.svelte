@@ -10,7 +10,9 @@
     <li>Anki 正在執行</li>
     <li>Anki 外掛程式 AnkiConnect 已安裝</li>
     <li>
-      連線到 AnkiConnect 的埠號（目前為 {port}）已正確設定。您可以在擴充套件的<LinkButton on:click>選項</LinkButton>中編輯設定。
+      連線到 AnkiConnect 的埠號（目前為 {port}）已正確設定。您可以在擴充套件的<LinkButton on:click
+        >選項</LinkButton
+      >中編輯設定。
     </li>
   </ul>
 </div>

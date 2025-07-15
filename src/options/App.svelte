@@ -24,9 +24,7 @@
   });
 
   const checkPort = () => {
-    portErrorMessage = isPortValid(parseInt(port, 10))
-      ? ''
-      : '請輸入有效的連接埠號碼 (1-65535)';
+    portErrorMessage = isPortValid(parseInt(port, 10)) ? '' : '請輸入有效的連接埠號碼 (1-65535)';
   };
 
   const handleTagPick = (tag: string) => {
