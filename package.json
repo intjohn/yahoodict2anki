@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "lint:fix": "eslint . --ext .js,.ts --fix",
     "prettier": "prettier --write \"**/*.{js,ts,json,html,css,svelte}\"",
-    "prettier:check": "prettier --check \"**/*.{js,ts,json,html,css}\"",
+    "prettier:check": "prettier --check \"**/*.{js,ts,json,html,css,svelte}\"",
     "clean": "rm -rf dist dist.zip",
     "prebuild": "pnpm clean",
     "postbuild": "copyfiles manifest.json \"images/**/*\" dist/ && copyfiles -f src/sidepanel/sidepanel.html dist/sidepanel/",
